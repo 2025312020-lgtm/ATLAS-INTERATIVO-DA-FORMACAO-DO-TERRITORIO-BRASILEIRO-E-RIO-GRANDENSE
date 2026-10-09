@@ -1,43 +1,112 @@
-/* Arredondar os controles de Zoom e Camadas */
+/* =========================================================
+   ESTILO PREMIUM / MODERN DASHBOARD - WEBSIG
+   ========================================================= */
+
+/* Fontes modernas para toda a aplicação */
+body, button, input, select, textarea, .leaflet-container {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* 1. ESTILIZAÇÃO DO TÍTULO / CABEÇALHO */
+#abstract, .leaflet-control h2 {
+  background: rgba(15, 23, 42, 0.85) !important; /* Azul escuro moderno */
+  color: #ffffff !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px !important;
+  padding: 10px 20px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+  text-transform: uppercase;
+}
+
+/* 2. CONTROLES DO LEAFLET (ZOOM, MEDIÇÃO, CAMADAS) */
 .leaflet-touch .leaflet-bar,
 .leaflet-touch .leaflet-control-layers {
   border: none !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2) !important;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Estilizar botões + e - */
+/* Botões do Zoom e Ferramentas */
 .leaflet-touch .leaflet-bar a {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #1f2937 !important;
-  border-bottom: 1px solid #eee !important;
-  transition: all 0.2s ease;
+  background: transparent !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.25s ease !important;
+  font-weight: bold;
 }
 
 .leaflet-touch .leaflet-bar a:hover {
-  background-color: #1f2937 !important;
+  background: #0f172a !important;
   color: #ffffff !important;
 }
 
-/* Modificar o Pop-up para estilo Card */
-.leaflet-popup-content-wrapper {
+/* Ícone de alternar camadas (canto superior direito) */
+.leaflet-control-layers-toggle {
   border-radius: 12px !important;
-  padding: 6px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Menu expansível de camadas */
+.leaflet-control-layers-expanded {
+  padding: 12px 16px !important;
+  color: #0f172a !important;
+  font-size: 13px !important;
+}
+
+/* 3. POP-UP MODERNO (CARD DESIGN) */
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px);
+  border-radius: 16px !important;
+  padding: 8px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.95) !important;
 }
 
 .leaflet-popup-content {
-  font-family: system-ui, -apple-system, sans-serif !important;
+  margin: 10px !important;
   font-size: 13px !important;
   line-height: 1.6 !important;
+  color: #334155 !important;
 }
 
-/* Deixar o cabeçalho do título com visual moderno */
-#abstract, .leaflet-control h2 {
-  font-family: system-ui, -apple-system, sans-serif !important;
-  border-radius: 8px !important;
-  padding: 8px 14px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+.leaflet-popup-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.leaflet-popup-content th {
+  color: #0f172a;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 6px 4px;
+}
+
+.leaflet-popup-content td {
+  padding: 6px 4px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* 4. RODAPÉ E ATRIBUIÇÕES */
+.leaflet-container .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(6px);
+  border-top-left-radius: 8px;
+  padding: 2px 8px !important;
+  font-size: 10px !important;
+  color: #64748b !important;
 }
