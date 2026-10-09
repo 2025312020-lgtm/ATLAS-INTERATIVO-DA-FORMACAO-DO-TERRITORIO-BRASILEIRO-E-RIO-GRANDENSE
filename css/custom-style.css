@@ -167,3 +167,16 @@ body, button, input, select, textarea, .leaflet-container {
   box-shadow: none !important;
   padding: 0 !important;
 }
+/* Removendo a caixa branca do título */
+#abstract,
+#abstract.leaflet-control,
+.leaflet-control-abstract {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+#abstract h2 {
+  margin: 0 !important;
+}
