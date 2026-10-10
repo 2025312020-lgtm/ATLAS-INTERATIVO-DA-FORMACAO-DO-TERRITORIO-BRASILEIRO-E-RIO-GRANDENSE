@@ -43,7 +43,7 @@
             --titulo: Arial, 'Helvetica Neue', Helvetica, sans-serif;
         }
         body { display: flex; overflow: hidden; font-family: var(--sans); }
-        #map { flex: 1 1 0; width: auto; min-width: 0; background: #10222f; font-family: var(--sans); }
+        #map { flex: 1 1 0; width: auto; min-width: 0; background: #d6dde1; font-family: var(--sans); }
         .leaflet-container { font-family: var(--sans); }
 
         /* ================= Barra lateral ================= */
@@ -1251,6 +1251,7 @@
 
         function criarCamadaGenerica(id, num, cor, opcoes) {
             opcoes = opcoes || {};
+            var corAtual = cor;
             var paneName = 'pane_' + id + '_' + num;
             var dados = window['json_' + id + '_' + num] || { type: 'FeatureCollection', features: [] };
             map.createPane(paneName);
@@ -1261,7 +1262,7 @@
                 var tipo = feature && feature.geometry ? feature.geometry.type : '';
                 if (tipo === 'LineString' || tipo === 'MultiLineString') {
                     return {
-                        pane: paneName, opacity: 1, color: cor, weight: opcoes.weight || 3,
+                        pane: paneName, opacity: 1, color: corAtual, weight: opcoes.weight || 3,
                         dashArray: opcoes.dashArray || '', lineCap: 'round', lineJoin: 'round',
                         fill: false, interactive: true
                     };
@@ -1269,7 +1270,7 @@
                 return {
                     pane: paneName, opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1.0,
                     dashArray: '', lineCap: 'butt', lineJoin: 'miter',
-                    fill: true, fillOpacity: 1, fillColor: cor, interactive: true
+                    fill: true, fillOpacity: 1, fillColor: corAtual, interactive: true
                 };
             }
 
@@ -1282,7 +1283,7 @@
                 pointToLayer: function(feature, latlng) {
                     return L.circleMarker(latlng, {
                         pane: paneName, radius: 6, opacity: 1, color: 'rgba(35,35,35,1.0)',
-                        weight: 1.0, fill: true, fillOpacity: 1, fillColor: cor, interactive: true
+                        weight: 1.0, fill: true, fillOpacity: 1, fillColor: corAtual, interactive: true
                     });
                 },
                 onEachFeature: function(feature, layer) {
@@ -1309,6 +1310,7 @@
                 },
                 style: estilo
             });
+            camada.definirCor = function(nova) { corAtual = nova; camada.setStyle(estilo); };
             bounds_group.addLayer(camada);
             window['layer_' + id + '_' + num] = camada; // desativada por padrão
             return camada;
@@ -1324,7 +1326,7 @@
             { k: 'DROGASDOSERTOEBORRACHA_6', nome: 'Drogas do Sertão e Borracha', cor: 'rgba(224,131,242,0.6)', grupo: GRUPOS[0] },
             { k: 'MATE_7', nome: 'Mate', cor: 'rgba(161,183,164,0.6)', grupo: GRUPOS[0] },
             { k: 'PECUARIA_8', nome: 'Pecuária', cor: 'rgba(88,121,74,0.6)', grupo: GRUPOS[0] },
-            { k: 'ALGODO_9', nome: 'Algodão', cor: 'rgba(218,226,236,0.65)', grupo: GRUPOS[0], gen: true },
+            { k: 'ALGODO_9', nome: 'Algodão', cor: 'rgba(218,226,236,0.65)', corClara: 'rgba(96,125,153,0.7)', grupo: GRUPOS[0], gen: true },
 
             { k: 'CAMINHODASMISSOES_10', nome: 'Caminho das Missões', cor: 'rgba(255,127,0,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
             { k: 'CAMINHOSALTERNATIVOS_11', nome: 'Caminhos Alternativos', cor: 'rgba(166,86,40,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
@@ -1344,7 +1346,7 @@
 
             { k: 'REDUES_19', nome: 'Reduções', cor: 'rgba(255,127,0,0.8)', grupo: GRUPOS[3], gen: true },
             { k: 'PRINCIPAISRUMOSDEPENETRAODOSBANDEIRANTES_25', nome: 'Rumos dos Bandeirantes', cor: 'rgba(217,95,2,1.0)', grupo: GRUPOS[3], tipo: 'linha', gen: true },
-            { k: 'TORDESILHAS_26', nome: 'Tordesilhas', cor: 'rgba(255,255,255,1.0)', acento: 'rgb(16,34,47)', grupo: GRUPOS[3], tipo: 'tracejada', opcoes: { weight: 3, dashArray: '10,6' }, gen: true }
+            { k: 'TORDESILHAS_26', nome: 'Tordesilhas', cor: 'rgba(255,255,255,1.0)', corClara: 'rgba(16,34,47,1.0)', acento: 'rgb(16,34,47)', grupo: GRUPOS[3], tipo: 'tracejada', opcoes: { weight: 3, dashArray: '10,6' }, gen: true }
         ];
 
         INFO_CAMADAS.forEach(function(c) {
@@ -1420,9 +1422,26 @@
             return '<i class="' + classe + '" aria-hidden="true"><b style="--c:' + c.cor + '"></b></i>';
         }
 
+        // Mapas de fundo didáticos (sem imagem de satélite)
+        var layer_MapaClaro = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+            subdomains: 'abcd',
+            minZoom: 1,
+            maxZoom: 28,
+            maxNativeZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        });
+        var layer_Relevo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            minZoom: 1,
+            maxZoom: 28,
+            maxNativeZoom: 18,
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, USGS, FAO, NPS, NRCAN and the GIS User Community'
+        });
+
         var BASES = [
             { nome: 'Satélite', layer: layer_GoogleSatellite_1 },
-            { nome: 'Com nomes de lugares', layer: layer_GoogleHybrid_0 }
+            { nome: 'Satélite com nomes', layer: layer_GoogleHybrid_0 },
+            { nome: 'Mapa claro', layer: layer_MapaClaro, clara: true },
+            { nome: 'Relevo', layer: layer_Relevo, clara: true }
         ];
         var segBases = document.getElementById('sb-bases');
         function trocarBase(i) {
@@ -1435,6 +1454,11 @@
             });
             Array.prototype.forEach.call(segBases.children, function(btn, j) {
                 btn.setAttribute('aria-checked', String(j === i));
+            });
+            // Em fundos claros, camadas muito claras ganham uma cor mais escura para continuar visíveis
+            INFO_CAMADAS.forEach(function(c) {
+                var l = window['layer_' + c.k];
+                if (c.corClara && l && l.definirCor) { l.definirCor(BASES[i].clara ? c.corClara : c.cor); }
             });
         }
         BASES.forEach(function(b, i) {
