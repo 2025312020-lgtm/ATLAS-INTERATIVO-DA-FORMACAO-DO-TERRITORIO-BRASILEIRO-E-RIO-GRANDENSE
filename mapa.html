@@ -33,9 +33,9 @@
             --line: rgba(16, 34, 47, 0.16);
             --hair: #e3e9ed;
             --hover: #f3f7f9;
-            --teal: #0e6e7a;
-            --teal-dark: #0b5861;
-            --teal-soft: rgba(14, 110, 122, 0.10);
+            --verde: #278036;
+            --verde-escuro: #1d6a2b;
+            --verde-suave: rgba(39, 128, 54, 0.10);
             --chip: #25323f;
             --sbw: 352px;
             --shadow: 0 8px 28px rgba(5, 18, 30, 0.32), 0 1px 3px rgba(5, 18, 30, 0.28);
@@ -96,7 +96,7 @@
             color: var(--ink-2);
             text-decoration: none;
         }
-        .sb-home:hover { color: var(--teal); background: var(--hover); }
+        .sb-home:hover { color: var(--verde); background: var(--hover); }
         .sb-close {
             display: grid;
             place-items: center;
@@ -111,7 +111,7 @@
         }
         .sb-close:hover { background: var(--hover); color: var(--ink); }
         .sb-head h1 { margin: 0; font: 400 22px/1.15 var(--serif); letter-spacing: -0.005em; }
-        .sb-head p { margin: 7px 0 0; font: 600 12.5px/1.2 var(--sans); color: var(--teal); }
+        .sb-head p { margin: 7px 0 0; font: 600 12.5px/1.2 var(--sans); color: var(--verde); }
 
         .sb-body {
             flex: 1 1 auto;
@@ -131,7 +131,7 @@
             border: none;
             background: none;
             font: 600 12.5px/1.2 var(--sans);
-            color: var(--teal);
+            color: var(--verde);
             cursor: pointer;
         }
         .sb-link:hover:not(:disabled) { text-decoration: underline; }
@@ -150,7 +150,7 @@
             transition: background-color .15s, color .15s, box-shadow .15s;
         }
         .seg button:hover { color: var(--ink); }
-        .seg button[aria-checked="true"] { background: #fff; color: var(--teal); box-shadow: 0 1px 3px rgba(16, 34, 47, 0.18); }
+        .seg button[aria-checked="true"] { background: #fff; color: var(--verde); box-shadow: 0 1px 3px rgba(16, 34, 47, 0.18); }
 
         /* Busca */
         .busca {
@@ -165,7 +165,7 @@
             background: #fff;
             color: var(--ink-2);
         }
-        .busca:focus-within { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+        .busca:focus-within { border-color: var(--verde); box-shadow: 0 0 0 3px var(--verde-suave); }
         .busca input {
             flex: 1;
             min-width: 0;
@@ -210,7 +210,7 @@
             color: var(--ink-2);
             font-variant-numeric: tabular-nums;
         }
-        .grupo .g-cont.on { background: var(--teal-soft); color: var(--teal); }
+        .grupo .g-cont.on { background: var(--verde-suave); color: var(--verde); }
         .grupo ul { margin: 0 0 10px; padding: 0; list-style: none; }
 
         /* Interruptor */
@@ -233,16 +233,16 @@
             box-shadow: 0 1px 2px rgba(16, 34, 47, 0.3);
             transition: transform .16s ease;
         }
-        input:checked + .trilho { background: var(--teal); }
+        input:checked + .trilho { background: var(--verde); }
         input:checked + .trilho::after { transform: translateX(14px); }
-        input:focus-visible + .trilho { outline: 2px solid var(--teal); outline-offset: 2px; }
+        input:focus-visible + .trilho { outline: 2px solid var(--verde); outline-offset: 2px; }
         .sb-in { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
         .g-switch { display: inline-flex; cursor: pointer; }
 
         /* Camadas */
         .item { display: flex; align-items: center; border-radius: 8px; }
         .item:hover { background: var(--hover); }
-        .item.on { background: var(--teal-soft); }
+        .item.on { background: var(--verde-suave); }
         .item label {
             position: relative;
             flex: 1;
@@ -284,7 +284,7 @@
             transition: opacity .15s;
         }
         .item:hover .ver, .item .ver:focus-visible { opacity: 1; }
-        .item .ver:hover { background: #fff; color: var(--teal); }
+        .item .ver:hover { background: #fff; color: var(--verde); }
         @media (hover: none) { .item .ver { opacity: 1; } }
         .sb-vazio { margin: 14px 0; font: 400 13px/1.4 var(--sans); color: var(--ink-2); }
 
@@ -298,26 +298,29 @@
             list-style: none;
         }
         .sb-foot summary::-webkit-details-marker { display: none; }
-        .sb-foot summary:hover { color: var(--teal); }
+        .sb-foot summary:hover { color: var(--verde); }
         .sb-foot dl { margin: 0 0 4px; }
         .sb-foot dt { margin-top: 8px; font: 600 11.5px/1.2 var(--sans); color: var(--ink-2); }
         .sb-foot dd { margin: 1px 0 0; font: 500 13.5px/1.35 var(--sans); overflow-wrap: anywhere; }
-        .sb-foot a { color: var(--teal); }
+        .sb-foot a { color: var(--verde); }
         .sb-foot a.sb-btn {
             display: inline-block;
             margin: 12px 0 16px;
             padding: 9px 14px;
             border-radius: 999px;
-            background: var(--teal);
+            background: var(--verde);
             color: #fff;
             font: 600 13px/1 var(--sans);
             text-decoration: none;
         }
-        .sb-foot a.sb-btn:hover { background: var(--teal-dark); }
-        .sb-logo { display: block; width: auto; height: 68px; margin: 16px 0 4px; }
+        .sb-foot a.sb-btn:hover { background: var(--verde-escuro); }
+        .sb-inst { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
+        .sb-logo { display: block; flex: none; width: auto; height: 68px; }
+        .sb-inst p { margin: 0; font: 400 12.5px/1.4 var(--sans); color: var(--ink-2); }
+        .sb-inst strong { display: block; margin-bottom: 2px; font: 700 13.5px/1.3 var(--sans); color: var(--ink); }
 
         #sidebar a:focus-visible, #sidebar button:focus-visible, .sb-foot summary:focus-visible, .grupo > summary:focus-visible {
-            outline: 2px solid var(--teal);
+            outline: 2px solid var(--verde);
             outline-offset: 2px;
             border-radius: 6px;
         }
@@ -331,13 +334,13 @@
             padding: 0 18px 0 14px;
             border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 999px;
-            background: var(--teal);
+            background: var(--verde);
             color: #fff;
             font: 600 14px/1 var(--sans);
             box-shadow: var(--shadow);
             cursor: pointer;
         }
-        .leaflet-container .sb-toggle:hover { background: var(--teal-dark); }
+        .leaflet-container .sb-toggle:hover { background: var(--verde-escuro); }
         .sb-toggle svg { flex: none; }
 
         /* ================= Controles do mapa ================= */
@@ -359,7 +362,7 @@
         }
         .leaflet-container .leaflet-bar a:last-child { border-bottom: none; }
         .leaflet-container .leaflet-bar a:hover,
-        .leaflet-container .leaflet-bar a:focus-visible { background: var(--teal-soft); color: var(--teal); }
+        .leaflet-container .leaflet-bar a:focus-visible { background: var(--verde-suave); color: var(--verde); }
         .leaflet-container .leaflet-control-measure { background: var(--glass); color: var(--ink); font-family: var(--sans); }
         .leaflet-container .leaflet-control-measure .leaflet-control-measure-toggle { font-size: 15px; text-align: center; }
 
@@ -373,7 +376,7 @@
             background: var(--glass);
             color: var(--ink);
             border-radius: 6px;
-            border-left: 5px solid var(--accent, var(--teal));
+            border-left: 5px solid var(--accent, var(--verde));
             box-shadow: var(--shadow);
         }
         .leaflet-container .leaflet-popup-tip { background: var(--glass); }
@@ -422,7 +425,7 @@
             text-shadow: none;
         }
         .leaflet-container .leaflet-control-attribution { background: rgba(242, 247, 249, 0.82); color: var(--ink-2); font-size: 10.5px; }
-        .leaflet-container .leaflet-control-attribution a { color: var(--teal); }
+        .leaflet-container .leaflet-control-attribution a { color: var(--verde); }
 
         /* ================= Telas pequenas: painel sobreposto ================= */
         @media (max-width: 760px) {
@@ -444,7 +447,7 @@
 
         #sidebar [hidden] { display: none !important; }
         .g-switch { position: relative; }
-        input:indeterminate + .trilho { background: #7fb4bb; }
+        input:indeterminate + .trilho { background: #8cc79a; }
         input:indeterminate + .trilho::after { transform: translateX(7px); }
         </style>
     </head>
@@ -483,12 +486,16 @@
                 </section>
             </div>
             <footer class="sb-foot">
-                <img class="sb-logo" src="logo-ifrs-rio-grande.png" width="499" height="778" alt="Instituto Federal Rio Grande do Sul, Campus Rio Grande">
+                <div class="sb-inst">
+                    <img class="sb-logo" src="logo-ifrs-rio-grande.png" width="499" height="778" alt="Instituto Federal Rio Grande do Sul, Campus Rio Grande">
+                    <p><strong>Projeto de pesquisa</strong>desenvolvido a partir do TCC de Vitória Mendonça Prestes</p>
+                </div>
                 <details>
                     <summary>Sobre o atlas</summary>
                     <dl>
-                        <dt>Autora</dt><dd>Vitória Mendonça Prestes</dd>
-                        <dt>Orientação</dt><dd>Jefferson Rodrigues dos Santos</dd>
+                        <dt>Projeto</dt><dd>Projeto de pesquisa desenvolvido a partir do TCC de Vitória Mendonça Prestes</dd>
+                        <dt>Coordenação</dt><dd>Jefferson Rodrigues dos Santos</dd>
+                        <dt>Bolsista</dt><dd>Murilo Dias dos Santos</dd>
                         <dt>Contato</dt><dd><a href="mailto:vitoriampresttes@gmail.com">vitoriampresttes@gmail.com</a></dd>
                     </dl>
                     <a class="sb-btn" target="_blank" rel="noopener" href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf">Ler o TCC (PDF)</a>
