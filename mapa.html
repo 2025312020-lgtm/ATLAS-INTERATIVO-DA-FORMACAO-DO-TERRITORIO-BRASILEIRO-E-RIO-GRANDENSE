@@ -268,7 +268,7 @@
         .sw b { position: absolute; inset: 2px; border-radius: 2px; background: var(--c); }
         .sw.linha b, .sw.tracejada b { inset: auto 2px; top: 50%; height: 3px; margin-top: -1.5px; }
         .sw.tracejada b { background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px); }
-        .item .ver {
+        .item .inf {
             flex: none;
             display: grid;
             place-items: center;
@@ -280,12 +280,10 @@
             background: transparent;
             color: var(--ink-2);
             cursor: pointer;
-            opacity: 0;
-            transition: opacity .15s;
+            transition: background-color .15s, color .15s;
         }
-        .item:hover .ver, .item .ver:focus-visible { opacity: 1; }
-        .item .ver:hover { background: #fff; color: var(--verde); }
-        @media (hover: none) { .item .ver { opacity: 1; } }
+        .item .inf:hover { background: #fff; color: var(--verde); }
+        .item .inf.ativo { background: var(--verde); color: #fff; }
         .sb-vazio { margin: 14px 0; font: 400 13px/1.4 var(--sans); color: var(--ink-2); }
 
         /* Rodapé */
@@ -324,6 +322,77 @@
             outline-offset: 2px;
             border-radius: 6px;
         }
+
+        /* ================= Texto explicativo da camada ================= */
+        #info-camada, #info-camada * { box-sizing: border-box; }
+        #info-camada {
+            position: fixed;
+            z-index: 1300;
+            top: 14px;
+            left: calc(var(--sbw) + 14px);
+            width: min(410px, calc(100vw - var(--sbw) - 28px));
+            max-height: calc(100vh - 28px);
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            color: var(--ink);
+            border: 1px solid var(--hair);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            animation: ic-entrar .2s ease both;
+        }
+        body.sb-closed #info-camada {
+            left: 14px;
+            top: 72px;
+            width: min(410px, calc(100vw - 28px));
+            max-height: calc(100vh - 86px);
+        }
+        #info-camada[hidden] { display: none; }
+        @keyframes ic-entrar { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .ic-cab { display: flex; align-items: flex-start; gap: 12px; padding: 18px 14px 12px 20px; }
+        .ic-tit { flex: 1; min-width: 0; }
+        .ic-grupo { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font: 600 12.5px/1.2 var(--sans); color: var(--ink-2); }
+        .ic-grupo .sw { margin: 0; }
+        #info-camada h2 { margin: 0; font: 700 20px/1.2 var(--titulo); letter-spacing: -0.01em; }
+        .ic-fechar {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--ink-2);
+            cursor: pointer;
+        }
+        .ic-fechar:hover { background: var(--hover); color: var(--ink); }
+        .ic-corpo { padding: 0 20px 6px; overflow-y: auto; font: 400 14.5px/1.6 var(--sans); color: #24343f; }
+        .ic-corpo p { margin: 0 0 12px; }
+        .ic-rodape { padding: 12px 20px 18px; border-top: 1px solid var(--hair); }
+        .ic-ver {
+            height: 42px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 999px;
+            background: var(--verde);
+            color: #fff;
+            font: 600 14px/1 var(--sans);
+            cursor: pointer;
+            transition: background-color .15s;
+        }
+        .ic-ver:hover { background: var(--verde-escuro); }
+        #info-camada button:focus-visible { outline: 2px solid var(--verde); outline-offset: 2px; }
+        @media (max-width: 760px) {
+            body #info-camada, body.sb-closed #info-camada {
+                left: 0; right: 0; top: auto; bottom: 0;
+                width: auto;
+                max-height: 72vh;
+                border-radius: 16px 16px 0 0;
+                border-bottom: none;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) { #info-camada { animation: none; } }
 
         /* ================= Botão que mostra/oculta o painel ================= */
         .leaflet-container .sb-toggle {
@@ -500,6 +569,21 @@
                     </dl>
                     <a class="sb-btn" target="_blank" rel="noopener" href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf">Ler o TCC (PDF)</a>
                 </details>
+            </footer>
+        </aside>
+        <aside id="info-camada" role="dialog" aria-labelledby="ic-titulo" hidden>
+            <header class="ic-cab">
+                <div class="ic-tit">
+                    <div class="ic-grupo" id="ic-grupo"></div>
+                    <h2 id="ic-titulo"></h2>
+                </div>
+                <button type="button" class="ic-fechar" aria-label="Fechar texto explicativo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </header>
+            <div class="ic-corpo" id="ic-corpo"></div>
+            <footer class="ic-rodape">
+                <button type="button" class="ic-ver" id="ic-ver">Ver no mapa</button>
             </footer>
         </aside>
         <div id="map">
@@ -1231,7 +1315,7 @@
         }
 
         // ===== Catálogo das camadas temáticas: nome, cor, grupo e tipo de traço =====
-        var GRUPOS = ['Produtos econômicos', 'Caminhos', 'Imigração e colonização', 'Outros'];
+        var GRUPOS = ['Ciclos econômicos', 'Caminhos', 'Imigração e colonização', 'Outros'];
         var INFO_CAMADAS = [
             { k: 'FUMO_2', nome: 'Fumo', cor: 'rgba(169,169,169,1.0)', grupo: GRUPOS[0] },
             { k: 'PAUBRASIL_3', nome: 'Pau-Brasil', cor: 'rgba(228,26,28,0.6)', grupo: GRUPOS[0] },
@@ -1363,7 +1447,7 @@
         });
         trocarBase(0);
 
-        var VER_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
+        var INFO_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.8" r="0.6" fill="currentColor"/></svg>';
         var gruposEl = document.getElementById('sb-grupos');
         var itens = [];   // { c, li, input, grupo }
         var grupos = [];  // { nome, det, cont, todas, itens }
@@ -1385,6 +1469,7 @@
                 g.todas.indeterminate = ativos > 0 && ativos < g.itens.length;
             });
             document.getElementById('sb-limpar').disabled = total === 0;
+            if (typeof atualizarInfo === 'function') { atualizarInfo(); }
         }
         function definir(c, ligar) {
             var l = window['layer_' + c.k];
@@ -1417,16 +1502,12 @@
                 li.className = 'item';
                 li.innerHTML =
                     '<label><input type="checkbox" class="sb-in"><span class="trilho"></span>' + amostra(c) + '<span class="nome">' + c.nome + '</span></label>' +
-                    '<button type="button" class="ver" aria-label="Ver ' + c.nome + ' no mapa" title="Ver no mapa">' + VER_ICON + '</button>';
+                    '<button type="button" class="inf" aria-label="Sobre a camada ' + c.nome + '" aria-haspopup="dialog" aria-expanded="false" title="Sobre esta camada">' + INFO_ICON + '</button>';
                 var input = li.querySelector('input');
                 input.addEventListener('change', function() { definir(c, input.checked); sincronizar(); });
-                li.querySelector('.ver').addEventListener('click', function() {
-                    definir(c, true);
-                    sincronizar();
-                    var l = window['layer_' + c.k];
-                    var b = l.getBounds && l.getBounds();
-                    if (b && b.isValid()) { map.fitBounds(b, { padding: [40, 40] }); }
-                    if (ehMovel()) { alternarPainel(false); }
+                li.querySelector('.inf').addEventListener('click', function(e) {
+                    var gatilho = e.currentTarget;
+                    if (infoAtual && infoAtual.c === c) { fecharInfo(); } else { abrirInfo(c, nome, gatilho); }
                 });
                 ul.appendChild(li);
                 var it = { c: c, li: li, input: input, grupo: g };
@@ -1464,6 +1545,156 @@
                 aberturaAntes = null;
             }
             document.getElementById('sb-vazio').hidden = achou > 0;
+        });
+
+        // ===== Texto explicativo de cada camada (edite aqui para ajustar os textos) =====
+        var TEXTOS_CAMADAS = {
+            "FUMO_2": [
+                        "Cultivado no Brasil desde o período colonial, o fumo teve na Bahia, em especial no Recôncavo, um dos seus principais centros. Boa parte da produção era trocada por africanos escravizados no tráfico atlântico.",
+                        "No Rio Grande do Sul, a cultura se firmou nas colônias de imigrantes alemães a partir do século XIX, com destaque para a região de Santa Cruz do Sul, e segue como atividade da agricultura familiar."
+            ],
+            "PAUBRASIL_3": [
+                        "O pau-brasil foi a primeira riqueza explorada pelos portugueses, no século XVI. Da madeira se extraía um corante vermelho muito procurado pela indústria têxtil europeia, e foi dele que o território acabou herdando o nome.",
+                        "A extração ocorria na mata atlântica do litoral e se apoiava no escambo com os povos indígenas, que cortavam e carregavam as toras em troca de objetos como machados, facas e tecidos. A exploração intensa reduziu muito as florestas dessa espécie."
+            ],
+            "CANADEAUCAR_4": [
+                        "O açúcar organizou a economia colonial a partir de meados do século XVI. Os engenhos combinavam grandes propriedades, monocultura voltada à exportação e trabalho de africanos escravizados.",
+                        "A produção se concentrou no litoral do Nordeste, sobretudo em Pernambuco e na Bahia, e fez do açúcar o principal produto da colônia até a ascensão da mineração, no século XVIII."
+            ],
+            "CAF_5": [
+                        "No século XIX, o café tornou-se o principal produto de exportação do Brasil. A lavoura se expandiu pelo Vale do Paraíba, no Rio de Janeiro e em São Paulo, e depois avançou pelo oeste paulista.",
+                        "No início dependeu do trabalho de pessoas escravizadas e, com o fim da escravidão, passou a contar com imigrantes europeus. A riqueza do café financiou ferrovias, cidades e a industrialização do Sudeste."
+            ],
+            "DROGASDOSERTOEBORRACHA_6": [
+                        "As chamadas drogas do sertão eram produtos extraídos da floresta amazônica, como cacau, cravo, canela, salsaparrilha e castanhas, coletados com conhecimento e trabalho indígena e levados à Europa a partir do século XVII.",
+                        "A borracha, tirada do látex da seringueira, ganhou importância mundial entre o fim do século XIX e as primeiras décadas do XX, atraindo migrantes, sobretudo nordestinos, para os seringais da Amazônia."
+            ],
+            "MATE_7": [
+                        "A erva-mate era consumida pelos povos indígenas guaranis antes da chegada dos europeus e foi difundida entre os colonizadores, em parte pelo trabalho dos jesuítas nas reduções.",
+                        "Entre os séculos XIX e XX, a extração e o beneficiamento da erva-mate tornaram-se atividades econômicas importantes no sul do Brasil, no Paraná, em Santa Catarina e no Rio Grande do Sul."
+            ],
+            "PECUARIA_8": [
+                        "No Rio Grande do Sul, a criação de gado começou com os rebanhos trazidos pelos jesuítas, que se multiplicaram soltos nos campos do sul e se tornaram a base da ocupação do território. Daí surgiram as grandes estâncias.",
+                        "O couro e, depois, o charque, produzido sobretudo em Pelotas a partir do fim do século XVIII, ligaram a economia gaúcha ao restante do país. A criação também sustentou o tropeirismo, que levava animais do Sul para as regiões de mineração."
+            ],
+            "ALGODO_9": [
+                        "O algodão era cultivado e usado pelos povos indígenas antes da colonização e passou a ter valor comercial no século XVIII, sobretudo no Maranhão, de onde era exportado para a indústria têxtil inglesa.",
+                        "A produção cresceu de novo na década de 1860, quando a Guerra de Secessão dos Estados Unidos reduziu a oferta mundial, e se expandiu depois por outras áreas do Nordeste e do Sudeste."
+            ],
+            "CAMINHODASMISSOES_10": [
+                        "Rota que ligava a região das missões jesuítico-guaranis, no noroeste do atual Rio Grande do Sul, às demais áreas do território.",
+                        "Por ela circulavam pessoas, rebanhos e mercadorias entre as missões e o restante da região."
+            ],
+            "CAMINHOSALTERNATIVOS_11": [
+                        "Rotas secundárias, abertas ao lado dos caminhos principais, que encurtavam distâncias ou permitiam desviar de pontos de cobrança de impostos e de vigilância.",
+                        "Mostram que a circulação de tropas e de mercadorias não seguia um único traçado, mas uma rede de trilhas que mudava conforme o terreno, o clima e a fiscalização."
+            ],
+            "CAMINHODAVACARIADOSPINHAIS_12": [
+                        "Rota usada por tropeiros a partir da década de 1730 para levar gado e mulas do sul até a feira de Sorocaba, em São Paulo, subindo o planalto e passando pelos campos de Vacaria e pelos pinhais.",
+                        "Ao longo do trajeto surgiram pousos e povoados que deram origem a várias cidades da serra e do planalto."
+            ],
+            "CAMINHODAPRAIA_13": [
+                        "Rota que seguia a faixa litorânea, ligando o extremo sul ao norte pela beira-mar. Foi um dos primeiros caminhos usados pelos portugueses para chegar ao sul.",
+                        "Era usada para o transporte de tropas, gado e mercadorias entre o litoral sul e a região de Laguna."
+            ],
+            "CAMINHOSDASTROPAS_14": [
+                        "O tropeirismo foi o transporte de gado, mulas e cavalos do Sul para São Paulo e Minas Gerais, a partir do século XVIII, para abastecer as regiões de mineração e de grande população.",
+                        "Os caminhos das tropas ligaram economias distantes, e os pousos usados pelos tropeiros deram origem a muitas vilas e cidades."
+            ],
+            "ALEMES_15": [
+                        "A imigração alemã para o Rio Grande do Sul começou em 1824, com a fundação da colônia de São Leopoldo, no vale do rio dos Sinos. As famílias recebiam lotes de terra e se dedicavam à agricultura familiar e ao artesanato.",
+                        "A partir dali, novas colônias foram abertas em outros vales, como o do Caí e o do Taquari, e depois em direção ao norte e ao noroeste do estado."
+            ],
+            "ITALIANOS_16": [
+                        "A imigração italiana organizada para o Rio Grande do Sul começou em 1875, na Serra Gaúcha, com famílias vindas sobretudo do norte da Itália. Elas receberam lotes em colônias como Conde d'Eu, Dona Isabel e Caxias.",
+                        "Dedicaram-se ao cultivo da uva e de outros produtos, ao comércio e à pequena indústria, o que marcou a economia e a cultura da serra."
+            ],
+            "AORIANOS_17": [
+                        "A partir de 1752, casais vindos dos Açores foram trazidos pela Coroa portuguesa para povoar e defender o sul, numa época de disputa com a Espanha pelas terras da região.",
+                        "Fundaram povoados no litoral e no entorno do Guaíba, entre eles o Porto dos Casais, origem de Porto Alegre."
+            ],
+            "OUTRASETNIAS_18": [
+                        "Além de alemães, italianos e açorianos, outros grupos chegaram ao Rio Grande do Sul e ajudaram a formar a população do estado, como poloneses, russos, judeus e sírio-libaneses.",
+                        "Esses grupos fundaram colônias e comunidades em diversas regiões e se somaram à presença anterior de povos indígenas e de africanos escravizados e seus descendentes."
+            ],
+            "REDUES_19": [
+                        "As reduções eram aldeamentos em que os jesuítas reuniam povos indígenas guaranis, organizando a vida religiosa, o trabalho e a produção. Na primeira metade do século XVII, as que existiam na região foram atacadas pelos bandeirantes, e seus habitantes recuaram para o oeste do rio Uruguai.",
+                        "A partir de 1682 voltaram ao território gaúcho, formando os Sete Povos das Missões. O Tratado de Madri (1750) e a Guerra Guaranítica (1753–1756) levaram à destruição desse sistema."
+            ],
+            "ZONASDEMATA_20": [
+                        "Áreas de floresta, sobretudo no norte e nas encostas do estado, que foram pouco ocupadas pela pecuária, pois a criação de gado dependia dos campos.",
+                        "Foram elas que o governo destinou às colônias de imigrantes, que derrubaram a mata para abrir lavouras e povoados."
+            ],
+            "ZONASDECOLONIZAOMISTA_21": [
+                        "Regiões onde conviveram, no mesmo território, colonos de diferentes origens, como alemães, italianos, poloneses e outros, e onde nenhum grupo ocupou sozinho a área.",
+                        "Nelas, a mistura de culturas, línguas e costumes marcou a formação das comunidades."
+            ],
+            "ZONASCOLONIZADASPORITALIANOS_22": [
+                        "Áreas de predominância da colonização italiana, concentradas na Serra Gaúcha e nas regiões vizinhas, para onde as famílias avançaram a partir das primeiras colônias, de 1875 em diante.",
+                        "A pequena propriedade familiar e a produção de uva e vinho estão entre as marcas dessas áreas."
+            ],
+            "ZONASCOLONIZADASPORAORIANOS_23": [
+                        "Áreas ocupadas pelos casais açorianos desde meados do século XVIII, no litoral e no entorno do Guaíba.",
+                        "Ali se desenvolveram a agricultura em pequena escala, como o cultivo de trigo, e a pesca, e se mantiveram costumes e festas de origem açoriana."
+            ],
+            "ZONASCOLONIZADASPORALEMES_24": [
+                        "Áreas de predominância da colonização alemã, que se estenderam a partir do vale do rio dos Sinos pelos vales do Caí, do Taquari e do Jacuí, e depois pelo norte e noroeste do estado.",
+                        "A agricultura familiar em pequenas propriedades, o artesanato e o comércio deram origem a muitas cidades da região."
+            ],
+            "PRINCIPAISRUMOSDEPENETRAODOSBANDEIRANTES_25": [
+                        "As bandeiras eram expedições partidas sobretudo de São Paulo, nos séculos XVII e XVIII, que percorreram o interior em busca de indígenas para escravizar e, depois, de ouro e pedras preciosas.",
+                        "Ao avançar para o oeste e para o sul, ultrapassaram o limite do Tratado de Tordesilhas. No sul, atacaram as reduções jesuíticas no século XVII."
+            ],
+            "TORDESILHAS_26": [
+                        "O Tratado de Tordesilhas foi assinado em 1494 entre Portugal e Espanha. Dividiu as terras descobertas e por descobrir por uma linha imaginária a 370 léguas a oeste das ilhas de Cabo Verde.",
+                        "Com o tempo, a expansão de bandeirantes, pecuaristas e missionários ultrapassou essa linha, e tratados posteriores, como o de Madri (1750), redefiniram as fronteiras do sul."
+            ]
+        };
+
+        var infoEl = document.getElementById('info-camada');
+        var infoAtual = null; // { c, grupo, gatilho }
+
+        function atualizarInfo() {
+            if (!infoAtual) { return; }
+            var ligada = map.hasLayer(window['layer_' + infoAtual.c.k]);
+            document.getElementById('ic-ver').textContent = ligada ? 'Ver no mapa' : 'Ligar e ver no mapa';
+        }
+        function abrirInfo(c, grupoNome, gatilho) {
+            if (infoAtual && infoAtual.gatilho) {
+                infoAtual.gatilho.classList.remove('ativo');
+                infoAtual.gatilho.setAttribute('aria-expanded', 'false');
+            }
+            infoAtual = { c: c, grupo: grupoNome, gatilho: gatilho };
+            document.getElementById('ic-grupo').innerHTML = amostra(c) + '<span>' + grupoNome + '</span>';
+            document.getElementById('ic-titulo').textContent = c.nome;
+            var paragrafos = TEXTOS_CAMADAS[c.k] || ['O texto explicativo desta camada ainda não foi cadastrado.'];
+            document.getElementById('ic-corpo').innerHTML = paragrafos.map(function(t) { return '<p>' + t + '</p>'; }).join('');
+            if (gatilho) { gatilho.classList.add('ativo'); gatilho.setAttribute('aria-expanded', 'true'); }
+            infoEl.hidden = false;
+            document.getElementById('ic-corpo').scrollTop = 0;
+            atualizarInfo();
+            if (ehMovel()) { alternarPainel(false); }
+            infoEl.querySelector('.ic-fechar').focus();
+        }
+        function fecharInfo() {
+            if (!infoAtual) { return; }
+            var g = infoAtual.gatilho;
+            if (g) { g.classList.remove('ativo'); g.setAttribute('aria-expanded', 'false'); }
+            infoEl.hidden = true;
+            infoAtual = null;
+            if (g && g.offsetParent !== null) { g.focus(); }
+        }
+        infoEl.querySelector('.ic-fechar').addEventListener('click', fecharInfo);
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharInfo(); } });
+        document.getElementById('ic-ver').addEventListener('click', function() {
+            if (!infoAtual) { return; }
+            var c = infoAtual.c;
+            definir(c, true);
+            sincronizar();
+            var l = window['layer_' + c.k];
+            var b = l.getBounds && l.getBounds();
+            if (b && b.isValid()) { map.fitBounds(b, { padding: [40, 40] }); }
+            if (ehMovel()) { fecharInfo(); }
         });
 
         sincronizar();
