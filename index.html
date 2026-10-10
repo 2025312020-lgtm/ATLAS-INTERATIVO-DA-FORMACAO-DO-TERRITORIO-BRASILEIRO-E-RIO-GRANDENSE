@@ -14,8 +14,9 @@
             --ink-2: #4f616d;
             --paper: #eef3f5;
             --hair: rgba(16, 34, 47, 0.14);
-            --teal: #0e6e7a;
-            --teal-dark: #0b5861;
+            --verde: #278036;
+            --verde-escuro: #1d6a2b;
+            --verde-logo: #3fa14c;
             --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             --serif: 'Young Serif', Georgia, 'Times New Roman', serif;
         }
@@ -51,7 +52,7 @@
             bottom: 0;
             left: 78%;
             width: 0;
-            border-left: 2px dashed var(--teal);
+            border-left: 2px dashed var(--verde-logo);
             opacity: 0.75;
             pointer-events: none;
             animation: tracar 1.6s ease-out both;
@@ -63,7 +64,7 @@
             writing-mode: vertical-rl;
             font: 600 13px/1 var(--sans);
             letter-spacing: 0.04em;
-            color: var(--teal);
+            color: var(--verde);
             white-space: nowrap;
         }
         @keyframes tracar {
@@ -81,7 +82,7 @@
             justify-content: center;
             padding: clamp(24px, 5vh, 56px) clamp(24px, 7vw, 112px) clamp(32px, 6vh, 64px);
         }
-        .sub { margin: 0 0 18px; font: 600 15px/1.2 var(--sans); color: var(--teal); }
+        .sub { margin: 0 0 18px; font: 600 15px/1.2 var(--sans); color: var(--verde); }
         h1 {
             margin: 0;
             max-width: 11em;
@@ -102,14 +103,14 @@
             height: 56px;
             padding: 0 34px;
             border-radius: 999px;
-            background: var(--teal);
+            background: var(--verde);
             color: #fff;
             font: 600 17px/1 var(--sans);
             text-decoration: none;
-            box-shadow: 0 10px 24px rgba(14, 110, 122, 0.28);
+            box-shadow: 0 10px 24px rgba(39, 128, 54, 0.28);
             transition: background-color .18s ease, box-shadow .18s ease;
         }
-        .cta:hover { background: var(--teal-dark); box-shadow: 0 12px 28px rgba(14, 110, 122, 0.36); }
+        .cta:hover { background: var(--verde-escuro); box-shadow: 0 12px 28px rgba(39, 128, 54, 0.36); }
         .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
         .temas {
@@ -128,14 +129,17 @@
             position: relative;
             display: flex;
             flex-wrap: wrap;
+            align-items: flex-end;
             justify-content: space-between;
-            gap: 8px 24px;
-            padding: 16px clamp(24px, 7vw, 112px) 22px;
+            gap: 10px 32px;
+            padding: 18px clamp(24px, 7vw, 112px) 24px;
             border-top: 1px solid var(--hair);
-            font: 500 13px/1.5 var(--sans);
+            font: 500 14px/1.5 var(--sans);
             color: var(--ink-2);
         }
-        footer a { color: var(--teal); font-weight: 600; }
+        footer p { margin: 0; }
+        footer strong { color: var(--ink); font-weight: 700; }
+        footer a { color: var(--verde); font-weight: 600; }
 
         @media (max-width: 900px) {
             .temas { grid-template-columns: 1fr 1fr; }
@@ -192,7 +196,10 @@
     </section>
 
     <footer>
-        <span>Autora: Vitória Mendonça Prestes. Orientação: Jefferson Rodrigues dos Santos.</span>
+        <div class="creditos">
+            <p><strong>Projeto de pesquisa</strong> desenvolvido a partir do TCC de Vitória Mendonça Prestes.</p>
+            <p>Coordenação: Jefferson Rodrigues dos Santos. Bolsista: Murilo Dias dos Santos.</p>
+        </div>
         <a href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf" target="_blank" rel="noopener">Ler o TCC (PDF)</a>
     </footer>
 </body>
