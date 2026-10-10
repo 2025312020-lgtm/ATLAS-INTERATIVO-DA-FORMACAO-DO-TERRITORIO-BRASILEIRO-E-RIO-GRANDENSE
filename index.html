@@ -28,33 +28,53 @@
         <style>
         :root {
             --ink: #10222f;
-            --ink-2: #4a5d6b;
+            --ink-2: #566774;
             --glass: rgba(242, 247, 249, 0.94);
             --line: rgba(16, 34, 47, 0.16);
+            --hair: #e3e9ed;
+            --hover: #f3f7f9;
             --teal: #0e6e7a;
+            --teal-dark: #0b5861;
             --teal-soft: rgba(14, 110, 122, 0.10);
             --chip: #25323f;
+            --sbw: 352px;
             --shadow: 0 8px 28px rgba(5, 18, 30, 0.32), 0 1px 3px rgba(5, 18, 30, 0.28);
             --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             --serif: 'Young Serif', Georgia, 'Times New Roman', serif;
         }
-        #map { background: #10222f; font-family: var(--sans); }
+        body { display: flex; overflow: hidden; font-family: var(--sans); }
+        #map { flex: 1 1 0; width: auto; min-width: 0; background: #10222f; font-family: var(--sans); }
         .leaflet-container { font-family: var(--sans); }
 
-        /* ---------- Título (cartela com régua de graduação) ---------- */
-        .leaflet-container .atlas-title {
+        /* ================= Barra lateral ================= */
+        #sidebar {
             position: relative;
-            max-width: min(330px, calc(100vw - 160px));
-            padding: 22px 18px 14px;
-            background: var(--glass);
-            -webkit-backdrop-filter: blur(12px) saturate(1.3);
-            backdrop-filter: blur(12px) saturate(1.3);
-            border: 1px solid var(--line);
-            border-radius: 3px;
-            box-shadow: var(--shadow);
+            z-index: 1100;
+            flex: none;
+            display: flex;
+            flex-direction: column;
+            width: var(--sbw);
+            height: 100%;
+            background: #fff;
             color: var(--ink);
+            border-right: 1px solid var(--hair);
+            box-shadow: 4px 0 24px rgba(5, 18, 30, 0.18);
+            transition: margin-left .26s ease, transform .26s ease, visibility 0s;
         }
-        .atlas-title::before {
+        body.sb-closed #sidebar {
+            margin-left: calc(-1 * var(--sbw));
+            visibility: hidden;
+            transition: margin-left .26s ease, visibility 0s .26s;
+        }
+        #sidebar * { box-sizing: border-box; }
+
+        .sb-head {
+            position: relative;
+            flex: none;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--hair);
+        }
+        .sb-head::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
@@ -62,21 +82,264 @@
             background:
                 repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 50px) 0 0 / 100% 11px no-repeat,
                 repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 10px) 0 0 / 100% 6px no-repeat;
-            opacity: 0.5;
+            opacity: 0.45;
         }
-        .atlas-title h1 {
-            margin: 0;
-            font: 400 21px/1.18 var(--serif);
-            letter-spacing: -0.005em;
-            color: var(--ink);
+        .sb-top { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 12px; }
+        .sb-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: -4px;
+            padding: 4px 8px 4px 4px;
+            border-radius: 6px;
+            font: 600 12.5px/1 var(--sans);
+            color: var(--ink-2);
+            text-decoration: none;
         }
-        .atlas-title p {
-            margin: 7px 0 0;
+        .sb-home:hover { color: var(--teal); background: var(--hover); }
+        .sb-close {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            margin-right: -6px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--ink-2);
+            cursor: pointer;
+        }
+        .sb-close:hover { background: var(--hover); color: var(--ink); }
+        .sb-head h1 { margin: 0; font: 400 22px/1.15 var(--serif); letter-spacing: -0.005em; }
+        .sb-head p { margin: 7px 0 0; font: 600 12.5px/1.2 var(--sans); color: var(--teal); }
+
+        .sb-body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: #c7d2d9 transparent;
+        }
+        .sb-sec { padding: 18px 20px 6px; }
+        .sb-sec + .sb-sec { padding-top: 12px; }
+        .sb-sec h2 { margin: 0 0 10px; font: 700 14px/1.2 var(--sans); color: var(--ink); }
+        .sb-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+        .sb-sec-head h2 { margin-bottom: 6px; }
+        .sb-dica { margin: 0 0 12px; font: 400 13px/1.45 var(--sans); color: var(--ink-2); }
+        .sb-link {
+            padding: 2px 0;
+            border: none;
+            background: none;
             font: 600 12.5px/1.2 var(--sans);
             color: var(--teal);
+            cursor: pointer;
+        }
+        .sb-link:hover:not(:disabled) { text-decoration: underline; }
+        .sb-link:disabled { color: #9aa9b3; cursor: default; }
+
+        /* Mapa base */
+        .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--hover); border-radius: 10px; }
+        .seg button {
+            padding: 9px 8px;
+            border: none;
+            border-radius: 7px;
+            background: transparent;
+            font: 600 13px/1.2 var(--sans);
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: background-color .15s, color .15s, box-shadow .15s;
+        }
+        .seg button:hover { color: var(--ink); }
+        .seg button[aria-checked="true"] { background: #fff; color: var(--teal); box-shadow: 0 1px 3px rgba(16, 34, 47, 0.18); }
+
+        /* Busca */
+        .busca {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 0 12px;
+            height: 40px;
+            border: 1px solid var(--hair);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--ink-2);
+        }
+        .busca:focus-within { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+        .busca input {
+            flex: 1;
+            min-width: 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            font: 500 13.5px/1 var(--sans);
+            color: var(--ink);
+        }
+        .busca input::placeholder { color: #8b9aa5; }
+
+        /* Grupos */
+        .grupo { border-bottom: 1px solid var(--hair); }
+        .grupo:last-of-type { border-bottom: none; }
+        .grupo > summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            list-style: none;
+            cursor: pointer;
+            user-select: none;
+        }
+        .grupo > summary::-webkit-details-marker { display: none; }
+        .grupo .chev {
+            flex: none;
+            width: 7px;
+            height: 7px;
+            margin: 0 3px 2px 2px;
+            border-right: 2px solid var(--ink-2);
+            border-bottom: 2px solid var(--ink-2);
+            transform: rotate(-45deg);
+            transition: transform .18s ease;
+        }
+        .grupo[open] .chev { transform: rotate(45deg); margin-bottom: 4px; }
+        .grupo .g-nome { flex: 1; font: 700 14px/1.25 var(--sans); }
+        .grupo .g-cont {
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--hover);
+            font: 600 11.5px/1.3 var(--sans);
+            color: var(--ink-2);
+            font-variant-numeric: tabular-nums;
+        }
+        .grupo .g-cont.on { background: var(--teal-soft); color: var(--teal); }
+        .grupo ul { margin: 0 0 10px; padding: 0; list-style: none; }
+
+        /* Interruptor */
+        .trilho {
+            position: relative;
+            flex: none;
+            width: 32px;
+            height: 18px;
+            border-radius: 999px;
+            background: #cbd5db;
+            transition: background-color .16s ease;
+        }
+        .trilho::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(16, 34, 47, 0.3);
+            transition: transform .16s ease;
+        }
+        input:checked + .trilho { background: var(--teal); }
+        input:checked + .trilho::after { transform: translateX(14px); }
+        input:focus-visible + .trilho { outline: 2px solid var(--teal); outline-offset: 2px; }
+        .sb-in { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+        .g-switch { display: inline-flex; cursor: pointer; }
+
+        /* Camadas */
+        .item { display: flex; align-items: center; border-radius: 8px; }
+        .item:hover { background: var(--hover); }
+        .item.on { background: var(--teal-soft); }
+        .item label {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            padding: 8px 6px 8px 8px;
+            cursor: pointer;
+            font: 500 13.5px/1.3 var(--sans);
+        }
+        .item .nome { flex: 1; min-width: 0; }
+        .sw {
+            position: relative;
+            display: inline-block;
+            flex: none;
+            width: 24px;
+            height: 14px;
+            border-radius: 4px;
+            background: var(--chip);
+            overflow: hidden;
+        }
+        .sw b { position: absolute; inset: 2px; border-radius: 2px; background: var(--c); }
+        .sw.linha b, .sw.tracejada b { inset: auto 2px; top: 50%; height: 3px; margin-top: -1.5px; }
+        .sw.tracejada b { background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px); }
+        .item .ver {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            margin-right: 4px;
+            border: none;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--ink-2);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity .15s;
+        }
+        .item:hover .ver, .item .ver:focus-visible { opacity: 1; }
+        .item .ver:hover { background: #fff; color: var(--teal); }
+        @media (hover: none) { .item .ver { opacity: 1; } }
+        .sb-vazio { margin: 14px 0; font: 400 13px/1.4 var(--sans); color: var(--ink-2); }
+
+        /* Rodapé */
+        .sb-foot { flex: none; border-top: 1px solid var(--hair); padding: 0 20px; background: #fff; }
+        .sb-foot summary {
+            padding: 13px 0;
+            font: 600 13px/1.2 var(--sans);
+            color: var(--ink-2);
+            cursor: pointer;
+            list-style: none;
+        }
+        .sb-foot summary::-webkit-details-marker { display: none; }
+        .sb-foot summary:hover { color: var(--teal); }
+        .sb-foot dl { margin: 0 0 4px; }
+        .sb-foot dt { margin-top: 8px; font: 600 11.5px/1.2 var(--sans); color: var(--ink-2); }
+        .sb-foot dd { margin: 1px 0 0; font: 500 13.5px/1.35 var(--sans); overflow-wrap: anywhere; }
+        .sb-foot a { color: var(--teal); }
+        .sb-foot a.sb-btn {
+            display: inline-block;
+            margin: 12px 0 16px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: var(--teal);
+            color: #fff;
+            font: 600 13px/1 var(--sans);
+            text-decoration: none;
+        }
+        .sb-foot a.sb-btn:hover { background: var(--teal-dark); }
+
+        #sidebar a:focus-visible, #sidebar button:focus-visible, .sb-foot summary:focus-visible, .grupo > summary:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
+            border-radius: 6px;
         }
 
-        /* ---------- Botões de zoom e medição ---------- */
+        /* ================= Botão que mostra/oculta o painel ================= */
+        .leaflet-container .sb-toggle {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            height: 44px;
+            padding: 0 18px 0 14px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            background: var(--teal);
+            color: #fff;
+            font: 600 14px/1 var(--sans);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        .leaflet-container .sb-toggle:hover { background: var(--teal-dark); }
+        .sb-toggle svg { flex: none; }
+
+        /* ================= Controles do mapa ================= */
         .leaflet-container .leaflet-bar {
             border: 1px solid var(--line);
             border-radius: 8px;
@@ -95,114 +358,11 @@
         }
         .leaflet-container .leaflet-bar a:last-child { border-bottom: none; }
         .leaflet-container .leaflet-bar a:hover,
-        .leaflet-container .leaflet-bar a:focus-visible {
-            background: var(--teal-soft);
-            color: var(--teal);
-        }
-        .leaflet-container .leaflet-control-measure {
-            background: var(--glass);
-            color: var(--ink);
-            font-family: var(--sans);
-        }
-        .leaflet-container .leaflet-control-measure .leaflet-control-measure-toggle {
-            font-size: 15px;
-            text-align: center;
-        }
+        .leaflet-container .leaflet-bar a:focus-visible { background: var(--teal-soft); color: var(--teal); }
+        .leaflet-container .leaflet-control-measure { background: var(--glass); color: var(--ink); font-family: var(--sans); }
+        .leaflet-container .leaflet-control-measure .leaflet-control-measure-toggle { font-size: 15px; text-align: center; }
 
-        /* ---------- Painel de camadas ---------- */
-        .leaflet-container .leaflet-control-layers {
-            background: var(--glass);
-            color: var(--ink);
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            font-family: var(--sans);
-        }
-        .leaflet-container .leaflet-control-layers:not(.leaflet-control-layers-expanded) {
-            background: var(--teal);
-            border-color: rgba(255, 255, 255, 0.25);
-            border-radius: 999px;
-        }
-        .leaflet-container .leaflet-control-layers-toggle {
-            display: flex !important;
-            align-items: center;
-            width: auto !important;
-            height: 44px !important;
-            padding: 0 18px 0 46px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M12 3 3 8l9 5 9-5-9-5Z'/%3E%3Cpath d='m3 12 9 5 9-5'/%3E%3Cpath d='m3 16 9 5 9-5'/%3E%3C/svg%3E") 15px center / 20px 20px no-repeat !important;
-            color: #fff;
-            font: 600 14px/1 var(--sans);
-            text-decoration: none;
-        }
-        .leaflet-control-layers-toggle::after { content: 'Camadas'; }
-        .leaflet-container .leaflet-control-layers-expanded {
-            padding: 12px 14px 10px 12px;
-            min-width: 260px;
-            max-width: min(340px, calc(100vw - 24px));
-        }
-        .leaflet-container .leaflet-control-layers-list {
-            max-height: calc(100vh - 110px);
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(16, 34, 47, 0.3) transparent;
-        }
-        .leaflet-container .leaflet-control-layers label {
-            font: 500 13.5px/1.35 var(--sans);
-            color: var(--ink);
-        }
-        .leaflet-container .leaflet-control-layers-selector {
-            accent-color: var(--teal);
-            margin-right: 6px;
-        }
-        .leaflet-container .leaflet-control-layers-separator {
-            border-top: 1px solid var(--line);
-            margin: 10px -2px;
-        }
-        .leaflet-control-layers .grp-root {
-            font: 400 15px/1.3 var(--serif);
-            color: var(--ink);
-        }
-        .leaflet-control-layers .grp {
-            font: 700 13.5px/1.35 var(--sans);
-            color: var(--ink);
-        }
-        .leaflet-control-layers .lyr {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 0;
-        }
-        .leaflet-control-layers .sw {
-            position: relative;
-            display: inline-block;
-            flex: none;
-            width: 24px;
-            height: 14px;
-            margin-right: 8px;
-            border-radius: 4px;
-            background: var(--chip);
-            overflow: hidden;
-        }
-        .leaflet-control-layers .sw b {
-            position: absolute;
-            inset: 2px;
-            border-radius: 2px;
-            background: var(--c);
-        }
-        .leaflet-control-layers .sw.linha b {
-            inset: auto 2px;
-            top: 50%;
-            height: 3px;
-            margin-top: -1.5px;
-        }
-        .leaflet-control-layers .sw.tracejada b {
-            inset: auto 2px;
-            top: 50%;
-            height: 3px;
-            margin-top: -1.5px;
-            background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px);
-        }
-
-        /* ---------- Popups ---------- */
+        /* ================= Popups ================= */
         .leaflet-popup, .leaflet-popup * { pointer-events: none !important; }
         .leaflet-popup-content.media, .leaflet-popup-content.media * { pointer-events: auto !important; }
         .leaflet-container .leaflet-popup-close-button { display: none; }
@@ -216,11 +376,7 @@
             box-shadow: var(--shadow);
         }
         .leaflet-container .leaflet-popup-tip { background: var(--glass); }
-        .leaflet-container .leaflet-popup-content {
-            margin: 0;
-            padding: 12px 16px 12px 14px;
-            font: 400 13px/1.45 var(--sans);
-        }
+        .leaflet-container .leaflet-popup-content { margin: 0; padding: 12px 16px 12px 14px; font: 400 13px/1.45 var(--sans); }
         .leaflet-popup-content table { width: 100%; border-collapse: collapse; }
         .leaflet-popup-content td { padding: 5px 0; vertical-align: top; }
         .leaflet-popup-content td br { display: none; }
@@ -232,11 +388,7 @@
             margin-bottom: 1px;
         }
         .leaflet-popup-content td strong::first-letter { text-transform: uppercase; }
-        .leaflet-popup-content tr.pp-nome td {
-            padding: 0 0 6px;
-            font: 400 18px/1.2 var(--serif);
-            color: var(--ink);
-        }
+        .leaflet-popup-content tr.pp-nome td { padding: 0 0 6px; font: 400 18px/1.2 var(--serif); color: var(--ink); }
         .leaflet-popup-content tr.pp-nome td strong { display: none; }
         .leaflet-popup-content tr.pp-fonte td {
             margin-top: 4px;
@@ -246,57 +398,7 @@
             color: var(--ink-2);
         }
 
-        /* ---------- Créditos ---------- */
-        .atlas-credits { position: relative; }
-        .atlas-credits-btn {
-            width: 38px;
-            height: 38px;
-            border: 1px solid var(--line);
-            border-radius: 50%;
-            background: var(--glass);
-            color: var(--teal);
-            font: italic 400 18px/1 var(--serif);
-            cursor: pointer;
-            box-shadow: var(--shadow);
-        }
-        .atlas-credits-btn:hover,
-        .atlas-credits-btn:focus-visible { background: #fff; outline: 2px solid var(--teal); outline-offset: 2px; }
-        .atlas-credits-card {
-            position: absolute;
-            left: 0;
-            bottom: 46px;
-            width: min(300px, calc(100vw - 24px));
-            padding: 16px 16px 14px;
-            background: var(--glass);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            color: var(--ink);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(6px);
-            transition: opacity .18s ease, transform .18s ease, visibility .18s;
-        }
-        .atlas-credits-card::after { content: ''; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; }
-        .atlas-credits.open .atlas-credits-card { opacity: 1; visibility: visible; transform: none; }
-        .atlas-credits-card h2 { margin: 0 0 10px; font: 400 17px/1.2 var(--serif); }
-        .atlas-credits-card dl { margin: 0; }
-        .atlas-credits-card dt { margin-top: 8px; font: 600 11.5px/1.2 var(--sans); color: var(--ink-2); }
-        .atlas-credits-card dd { margin: 1px 0 0; font: 500 13.5px/1.35 var(--sans); overflow-wrap: anywhere; }
-        .atlas-credits-card a { color: var(--teal); }
-        .atlas-credits-card a.atlas-btn {
-            display: inline-block;
-            margin-top: 14px;
-            padding: 9px 14px;
-            background: var(--teal);
-            color: #fff;
-            border-radius: 999px;
-            font: 600 13px/1 var(--sans);
-            text-decoration: none;
-        }
-        .atlas-credits-card a.atlas-btn:hover { background: #0b5861; }
-
-        /* ---------- Coordenadas, escala e atribuição ---------- */
+        /* ================= Coordenadas, escala e atribuição ================= */
         .leaflet-container .atlas-readout {
             padding: 6px 10px;
             background: var(--glass);
@@ -318,25 +420,79 @@
             font: 600 11px/1.3 var(--sans);
             text-shadow: none;
         }
-        .leaflet-container .leaflet-control-attribution {
-            background: rgba(242, 247, 249, 0.82);
-            color: var(--ink-2);
-            font-size: 10.5px;
-        }
+        .leaflet-container .leaflet-control-attribution { background: rgba(242, 247, 249, 0.82); color: var(--ink-2); font-size: 10.5px; }
         .leaflet-container .leaflet-control-attribution a { color: var(--teal); }
 
-        @media (max-width: 640px) {
-            .atlas-title h1 { font-size: 17px; }
-            .leaflet-container .atlas-title { padding: 20px 14px 12px; }
+        /* ================= Telas pequenas: painel sobreposto ================= */
+        @media (max-width: 760px) {
+            :root { --sbw: min(360px, 88vw); }
+            #sidebar {
+                position: absolute;
+                top: 0; left: 0; bottom: 0;
+                transform: translateX(-105%);
+                visibility: hidden;
+                transition: transform .26s ease, visibility 0s .26s;
+            }
+            body.sb-open #sidebar { transform: none; visibility: visible; transition: transform .26s ease, visibility 0s; }
+            body.sb-closed #sidebar { margin-left: 0; }
             .leaflet-container .atlas-readout { display: none; }
-            .leaflet-container .leaflet-control-layers-toggle { padding-right: 14px; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .atlas-credits-card, .leaflet-container .leaflet-bar a { transition: none; }
+            #sidebar, .trilho, .trilho::after, .grupo .chev, .seg button, .leaflet-container .leaflet-bar a { transition: none !important; }
         }
+
+        #sidebar [hidden] { display: none !important; }
+        .g-switch { position: relative; }
+        input:indeterminate + .trilho { background: #7fb4bb; }
+        input:indeterminate + .trilho::after { transform: translateX(7px); }
         </style>
     </head>
     <body>
+        <aside id="sidebar" aria-label="Painel de camadas">
+            <header class="sb-head">
+                <div class="sb-top">
+                    <a class="sb-home" href="index.html">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                        Página inicial
+                    </a>
+                    <button type="button" class="sb-close" aria-label="Ocultar painel">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <h1>Formação do território brasileiro e rio-grandense</h1>
+                <p>Atlas interativo</p>
+            </header>
+            <div class="sb-body">
+                <section class="sb-sec">
+                    <h2>Mapa base</h2>
+                    <div class="seg" id="sb-bases" role="radiogroup" aria-label="Mapa base"></div>
+                </section>
+                <section class="sb-sec">
+                    <div class="sb-sec-head">
+                        <h2>Camadas temáticas</h2>
+                        <button type="button" class="sb-link" id="sb-limpar" disabled>Desligar todas</button>
+                    </div>
+                    <p class="sb-dica">Todas começam desligadas. Ative as que quiser e passe o mouse sobre o mapa para ver os detalhes.</p>
+                    <label class="busca">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                        <input id="sb-busca" type="search" placeholder="Buscar camada" aria-label="Buscar camada" autocomplete="off">
+                    </label>
+                    <div id="sb-grupos"></div>
+                    <p class="sb-vazio" id="sb-vazio" hidden>Nenhuma camada encontrada.</p>
+                </section>
+            </div>
+            <footer class="sb-foot">
+                <details>
+                    <summary>Sobre o atlas</summary>
+                    <dl>
+                        <dt>Autora</dt><dd>Vitória Mendonça Prestes</dd>
+                        <dt>Orientação</dt><dd>Jefferson Rodrigues dos Santos</dd>
+                        <dt>Contato</dt><dd><a href="mailto:vitoriampresttes@gmail.com">vitoriampresttes@gmail.com</a></dd>
+                    </dl>
+                    <a class="sb-btn" target="_blank" rel="noopener" href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf">Ler o TCC (PDF)</a>
+                </details>
+            </footer>
+        </aside>
         <div id="map">
         </div>
         <script src="js/qgis2web_expressions.js"></script>
@@ -460,39 +616,17 @@
                 popup._contentNode.classList.remove('media');
             }
         }
-        var title = new L.Control({'position':'topleft'});
-        title.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'atlas-title');
-            this.update();
-            L.DomEvent.disableClickPropagation(this._div);
-            return this._div;
+        var painelCtl = new L.Control({'position':'topleft'});
+        painelCtl.onAdd = function (map) {
+            var b = L.DomUtil.create('button', 'sb-toggle');
+            b.type = 'button';
+            b.setAttribute('aria-controls', 'sidebar');
+            L.DomEvent.disableClickPropagation(b);
+            L.DomEvent.on(b, 'click', function () { alternarPainel(); });
+            window.btnPainel = b;
+            return b;
         };
-        title.update = function () {
-            this._div.innerHTML = '<h1>Formação do território brasileiro e rio-grandense</h1><p>Atlas interativo</p>';
-        };
-        title.addTo(map);
-        var abstract = new L.Control({'position':'bottomleft'});
-        abstract.onAdd = function (map) {
-            var div = L.DomUtil.create('div', 'atlas-credits');
-            div.innerHTML =
-                '<button type="button" class="atlas-credits-btn" aria-label="Sobre o atlas">i</button>' +
-                '<div class="atlas-credits-card">' +
-                    '<h2>Sobre o atlas</h2>' +
-                    '<dl>' +
-                        '<dt>Autora</dt><dd>Vitória Mendonça Prestes</dd>' +
-                        '<dt>Orientação</dt><dd>Jefferson Rodrigues dos Santos</dd>' +
-                        '<dt>Contato</dt><dd><a href="mailto:vitoriampresttes@gmail.com">vitoriampresttes@gmail.com</a></dd>' +
-                    '</dl>' +
-                    '<a class="atlas-btn" target="_blank" rel="noopener" href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf">Ler o TCC (PDF)</a>' +
-                '</div>';
-            L.DomEvent.disableClickPropagation(div);
-            L.DomEvent.disableScrollPropagation(div);
-            L.DomEvent.on(div.querySelector('button'), 'click', function () { div.classList.toggle('open'); });
-            div.addEventListener('mouseenter', function () { div.classList.add('open'); });
-            div.addEventListener('mouseleave', function () { div.classList.remove('open'); });
-            return div;
-        };
-        abstract.addTo(map);
+        painelCtl.addTo(map);
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
@@ -1156,41 +1290,174 @@
             if (fonte) { fonte.parentNode.appendChild(fonte); }
         });
 
-        // ===== Controle de camadas: só o satélite começa ativo =====
-        function amostra(c) {
-            var cor = c.cor;
-            var classe = c.tipo === 'linha' ? 'sw linha' : (c.tipo === 'tracejada' ? 'sw tracejada' : 'sw');
-            return '<i class="' + classe + '"><b style="--c:' + cor + '"></b></i>';
+        // ===== Painel lateral: exibir/ocultar =====
+        var ICON_CAMADAS = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg>';
+        var ICON_FECHAR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="m16 10-2 2 2 2"/></svg>';
+        function ehMovel() { return window.matchMedia('(max-width: 760px)').matches; }
+        function painelAberto() {
+            return ehMovel() ? document.body.classList.contains('sb-open') : !document.body.classList.contains('sb-closed');
+        }
+        function atualizarBotaoPainel() {
+            var b = window.btnPainel;
+            if (!b) { return; }
+            var aberto = painelAberto();
+            b.setAttribute('aria-expanded', String(aberto));
+            b.innerHTML = (aberto ? ICON_FECHAR : ICON_CAMADAS) + '<span>' + (aberto ? 'Ocultar painel' : 'Camadas') + '</span>';
+        }
+        function alternarPainel(abrir) {
+            if (typeof abrir !== 'boolean') { abrir = !painelAberto(); }
+            if (ehMovel()) {
+                document.body.classList.toggle('sb-open', abrir);
+            } else {
+                document.body.classList.toggle('sb-closed', !abrir);
+            }
+            atualizarBotaoPainel();
+            setTimeout(function() { map.invalidateSize(); }, 300);
+        }
+        atualizarBotaoPainel();
+        document.querySelector('.sb-close').addEventListener('click', function() { alternarPainel(false); });
+        if (window.ResizeObserver) {
+            new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
         }
 
-        var baseTree = {
-            label: '<span class="grp-root">Mapa base</span>',
-            children: [
-                { label: 'Satélite', layer: layer_GoogleSatellite_1, radioGroup: 'bm' },
-                { label: 'Satélite com nomes de lugares', layer: layer_GoogleHybrid_0, radioGroup: 'bm' }
-            ]
-        };
+        // ===== Painel lateral: mapa base e camadas =====
+        function semAcento(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+        function amostra(c) {
+            var classe = c.tipo === 'linha' ? 'sw linha' : (c.tipo === 'tracejada' ? 'sw tracejada' : 'sw');
+            return '<i class="' + classe + '" aria-hidden="true"><b style="--c:' + c.cor + '"></b></i>';
+        }
 
-        var overlaysTree = {
-            label: '<span class="grp-root">Camadas temáticas</span>',
-            selectAllCheckbox: false,
-            children: GRUPOS.map(function(g) {
-                return {
-                    label: '<span class="grp">' + g + '</span>',
-                    selectAllCheckbox: true,
-                    collapsed: true,
-                    children: INFO_CAMADAS
-                        .filter(function(c) { return c.grupo === g && window['layer_' + c.k]; })
-                        .map(function(c) {
-                            return { label: '<span class="lyr">' + amostra(c) + c.nome + '</span>', layer: window['layer_' + c.k] };
-                        })
-                };
-            })
-        };
+        var BASES = [
+            { nome: 'Satélite', layer: layer_GoogleSatellite_1 },
+            { nome: 'Com nomes de lugares', layer: layer_GoogleHybrid_0 }
+        ];
+        var segBases = document.getElementById('sb-bases');
+        function trocarBase(i) {
+            BASES.forEach(function(b, j) {
+                if (j === i) {
+                    if (!map.hasLayer(b.layer)) { map.addLayer(b.layer); }
+                } else if (map.hasLayer(b.layer)) {
+                    map.removeLayer(b.layer);
+                }
+            });
+            Array.prototype.forEach.call(segBases.children, function(btn, j) {
+                btn.setAttribute('aria-checked', String(j === i));
+            });
+        }
+        BASES.forEach(function(b, i) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('role', 'radio');
+            btn.textContent = b.nome;
+            btn.addEventListener('click', function() { trocarBase(i); });
+            segBases.appendChild(btn);
+        });
+        trocarBase(0);
 
-        var layerControl = L.control.layers.tree(baseTree, overlaysTree, {
-            collapsed: true
-        }).addTo(map);
+        var VER_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
+        var gruposEl = document.getElementById('sb-grupos');
+        var itens = [];   // { c, li, input, grupo }
+        var grupos = [];  // { nome, det, cont, todas, itens }
+
+        function sincronizar() {
+            var total = 0;
+            grupos.forEach(function(g) {
+                var ativos = 0;
+                g.itens.forEach(function(it) {
+                    var on = map.hasLayer(window['layer_' + it.c.k]);
+                    it.input.checked = on;
+                    it.li.classList.toggle('on', on);
+                    if (on) { ativos++; }
+                });
+                total += ativos;
+                g.cont.textContent = ativos + '/' + g.itens.length;
+                g.cont.classList.toggle('on', ativos > 0);
+                g.todas.checked = ativos === g.itens.length && ativos > 0;
+                g.todas.indeterminate = ativos > 0 && ativos < g.itens.length;
+            });
+            document.getElementById('sb-limpar').disabled = total === 0;
+        }
+        function definir(c, ligar) {
+            var l = window['layer_' + c.k];
+            if (!l) { return; }
+            if (ligar && !map.hasLayer(l)) { map.addLayer(l); }
+            if (!ligar && map.hasLayer(l)) { map.removeLayer(l); }
+        }
+
+        GRUPOS.forEach(function(nome, gi) {
+            var cams = INFO_CAMADAS.filter(function(c) { return c.grupo === nome && window['layer_' + c.k]; });
+            if (!cams.length) { return; }
+            var det = document.createElement('details');
+            det.className = 'grupo';
+            if (gi === 0) { det.open = true; }
+            det.innerHTML =
+                '<summary><span class="chev"></span><span class="g-nome">' + nome + '</span><span class="g-cont"></span>' +
+                '<label class="g-switch" title="Ligar ou desligar todas"><input type="checkbox" class="sb-in g-todas" aria-label="Ligar ou desligar todas as camadas de ' + nome + '"><span class="trilho"></span></label>' +
+                '</summary><ul></ul>';
+            var ul = det.querySelector('ul');
+            var g = { nome: nome, det: det, cont: det.querySelector('.g-cont'), todas: det.querySelector('.g-todas'), itens: [] };
+
+            det.querySelector('.g-switch').addEventListener('click', function(e) { e.stopPropagation(); });
+            g.todas.addEventListener('change', function() {
+                g.itens.forEach(function(it) { definir(it.c, g.todas.checked); });
+                sincronizar();
+            });
+
+            cams.forEach(function(c) {
+                var li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML =
+                    '<label><input type="checkbox" class="sb-in"><span class="trilho"></span>' + amostra(c) + '<span class="nome">' + c.nome + '</span></label>' +
+                    '<button type="button" class="ver" aria-label="Ver ' + c.nome + ' no mapa" title="Ver no mapa">' + VER_ICON + '</button>';
+                var input = li.querySelector('input');
+                input.addEventListener('change', function() { definir(c, input.checked); sincronizar(); });
+                li.querySelector('.ver').addEventListener('click', function() {
+                    definir(c, true);
+                    sincronizar();
+                    var l = window['layer_' + c.k];
+                    var b = l.getBounds && l.getBounds();
+                    if (b && b.isValid()) { map.fitBounds(b, { padding: [40, 40] }); }
+                    if (ehMovel()) { alternarPainel(false); }
+                });
+                ul.appendChild(li);
+                var it = { c: c, li: li, input: input, grupo: g };
+                g.itens.push(it);
+                itens.push(it);
+            });
+            gruposEl.appendChild(det);
+            grupos.push(g);
+        });
+
+        document.getElementById('sb-limpar').addEventListener('click', function() {
+            itens.forEach(function(it) { definir(it.c, false); });
+            sincronizar();
+        });
+
+        // Busca por nome de camada
+        var aberturaAntes = null;
+        document.getElementById('sb-busca').addEventListener('input', function(e) {
+            var q = semAcento(e.target.value.trim());
+            var achou = 0;
+            if (q && !aberturaAntes) { aberturaAntes = grupos.map(function(g) { return g.det.open; }); }
+            grupos.forEach(function(g, gi) {
+                var visiveis = 0;
+                g.itens.forEach(function(it) {
+                    var mostra = !q || semAcento(it.c.nome).indexOf(q) !== -1;
+                    it.li.hidden = !mostra;
+                    if (mostra) { visiveis++; }
+                });
+                g.det.hidden = visiveis === 0;
+                if (q) { g.det.open = visiveis > 0; }
+                achou += visiveis;
+            });
+            if (!q && aberturaAntes) {
+                grupos.forEach(function(g, gi) { g.det.open = aberturaAntes[gi]; });
+                aberturaAntes = null;
+            }
+            document.getElementById('sb-vazio').hidden = achou > 0;
+        });
+
+        sincronizar();
 
         // ===== Escala e coordenadas do cursor =====
         L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 140 }).addTo(map);
