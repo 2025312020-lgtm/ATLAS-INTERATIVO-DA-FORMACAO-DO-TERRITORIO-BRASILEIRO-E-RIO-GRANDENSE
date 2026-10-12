@@ -140,11 +140,11 @@
         /* Mapa base */
         .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--hover); border-radius: 10px; }
         .seg button {
-            padding: 9px 8px;
+            padding: 9px 4px;
             border: none;
             border-radius: 7px;
             background: transparent;
-            font: 600 13px/1.2 var(--sans);
+            font: 600 12.5px/1.2 var(--sans);
             color: var(--ink-2);
             cursor: pointer;
             transition: background-color .15s, color .15s, box-shadow .15s;
@@ -323,15 +323,42 @@
             border-radius: 6px;
         }
 
+        /* ================= Filtro de séculos ================= */
+        .seculos { display: flex; flex-wrap: wrap; gap: 4px; }
+        .seculos button {
+            min-width: 40px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid var(--hair);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--ink-2);
+            font: 600 12.5px/1 var(--sans);
+            cursor: pointer;
+            transition: background-color .15s, border-color .15s, color .15s;
+        }
+        .seculos button:hover:not(:disabled) { border-color: var(--verde); color: var(--verde); }
+        .seculos button[aria-pressed="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+        .sb-nota { margin: 10px 0 0; font: 400 12.5px/1.45 var(--sans); color: var(--ink-2); }
+        .item.vazia .nome { opacity: 0.45; }
+
+        .sw b { box-shadow: inset 0 0 0 1px var(--b, transparent); }
+        .sw.icone { background: #e9eef1; }
+        .sw.icone img { position: absolute; top: 1px; left: 50%; width: 12px; height: 12px; margin-left: -6px; }
+        .ic-fonte { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--hair); font: 400 12.5px/1.5 var(--sans); color: var(--ink-2); }
+        .ic-fonte span { display: block; margin-bottom: 8px; }
+        .ic-fonte strong { display: block; font-weight: 700; color: var(--ink); }
+        .ic-fonte a { color: var(--verde); overflow-wrap: anywhere; }
+
         /* ================= Texto explicativo da camada ================= */
         #info-camada, #info-camada * { box-sizing: border-box; }
         #info-camada {
             position: fixed;
             z-index: 1300;
             top: 14px;
-            left: calc(var(--sbw) + 14px);
+            right: 14px;
             width: min(410px, calc(100vw - var(--sbw) - 28px));
-            max-height: calc(100vh - 28px);
+            max-height: calc(100vh - 120px);
             display: flex;
             flex-direction: column;
             background: #fff;
@@ -341,12 +368,7 @@
             box-shadow: var(--shadow);
             animation: ic-entrar .2s ease both;
         }
-        body.sb-closed #info-camada {
-            left: 14px;
-            top: 72px;
-            width: min(410px, calc(100vw - 28px));
-            max-height: calc(100vh - 86px);
-        }
+        body.sb-closed #info-camada { width: min(410px, calc(100vw - 28px)); }
         #info-camada[hidden] { display: none; }
         @keyframes ic-entrar { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
         .ic-cab { display: flex; align-items: flex-start; gap: 12px; padding: 18px 14px 12px 20px; }
@@ -542,10 +564,19 @@
                 </section>
                 <section class="sb-sec">
                     <div class="sb-sec-head">
+                        <h2>Filtrar por século</h2>
+                        <button type="button" class="sb-link" id="sb-seculos-limpar" disabled>Ver todos</button>
+                    </div>
+                    <p class="sb-dica">Mostra só o que aconteceu nos séculos escolhidos.</p>
+                    <div class="seculos" id="sb-seculos" role="group" aria-label="Filtrar por século"></div>
+                    <p class="sb-nota" id="sb-seculos-nota"></p>
+                </section>
+                <section class="sb-sec">
+                    <div class="sb-sec-head">
                         <h2>Camadas temáticas</h2>
                         <button type="button" class="sb-link" id="sb-limpar" disabled>Desligar todas</button>
                     </div>
-                    <p class="sb-dica">Todas começam desligadas. Ative as que quiser e passe o mouse sobre o mapa para ver os detalhes.</p>
+                    <p class="sb-dica">Todas começam desligadas. Passe o mouse sobre o mapa para ver os detalhes.</p>
                     <label class="busca">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                         <input id="sb-busca" type="search" placeholder="Buscar camada" aria-label="Buscar camada" autocomplete="off">
@@ -1235,13 +1266,12 @@
         // map.addLayer(layer_PECUARIA_8); // Desativada por padrão
 
         // ===== Camadas 9 a 26 (mesmo comportamento das anteriores: popup ao passar o mouse) =====
+        // Campos que aparecem nos popups (os demais, como id e códigos do IBGE, ficam de fora)
+        var CAMPOS_POPUP = ['NOME', 'DATA', 'FUNDADOR', 'FONTE', 'FONTE MAPA', 'FONTE INFO'];
         function conteudoPopupGenerico(feature) {
             var props = feature.properties || {};
-            var ordem = ['NOME', 'DATA', 'FONTE'];
-            var chaves = ordem.filter(function(k) { return k in props; })
-                .concat(Object.keys(props).filter(function(k) { return ordem.indexOf(k) < 0; }));
             var html = '<table>';
-            chaves.forEach(function(k) {
+            CAMPOS_POPUP.forEach(function(k) {
                 var v = props[k];
                 if (v === null || v === undefined || v === '') { return; }
                 html += '<tr><td colspan="2"><strong>' + k + '</strong><br />' + autolinker.link(String(v)) + '</td></tr>';
@@ -1249,28 +1279,58 @@
             return html + '</table>';
         }
 
-        function criarCamadaGenerica(id, num, cor, opcoes) {
-            opcoes = opcoes || {};
-            var corAtual = cor;
+        // Troca a cor das hachuras (usado quando o mapa de fundo é claro)
+        function recolorirPadrao(padrao, cor) {
+            Object.keys(padrao._shapes || {}).forEach(function(k) {
+                var s = padrao._shapes[k];
+                if (s.options.opacity > 0) { s.setStyle({ color: cor }); }
+            });
+        }
+        // No marcador (ícone) não há como mudar o estilo: só abre o popup
+        function destacarSeguro(e) {
+            if (typeof e.target.setStyle === 'function') { highlightFeature(e); } else { e.target.openPopup(); }
+        }
+
+        function criarCamadaGenerica(id, num, c) {
+            var corAtual = c.cor;
+            var borda = c.borda || 'rgba(35,35,35,1.0)';
             var paneName = 'pane_' + id + '_' + num;
             var dados = window['json_' + id + '_' + num] || { type: 'FeatureCollection', features: [] };
             map.createPane(paneName);
             map.getPane(paneName).style.zIndex = 400 + num;
             map.getPane(paneName).style['mix-blend-mode'] = 'normal';
+            if (c.halo) { map.getPane(paneName).style.filter = c.halo; }   // contorno das linhas brancas
+
+            // Hachuras (zonas 21, 22 e 24)
+            var padrao = null;
+            try {
+                if (c.tipo === 'hachura' && L.StripePattern) {
+                    padrao = new L.StripePattern({ weight: 2, spaceWeight: 4, height: 6, color: c.cor, opacity: 1, angle: c.angulo });
+                } else if (c.tipo === 'hachuraX' && L.Pattern && L.PatternPath) {
+                    padrao = new L.Pattern({ width: 8, height: 8 });
+                    padrao.addShape(new L.PatternPath({ d: 'M0 0 L8 8', color: c.cor, weight: 1.5, opacity: 1 }));
+                    padrao.addShape(new L.PatternPath({ d: 'M8 0 L0 8', color: c.cor, weight: 1.5, opacity: 1 }));
+                }
+                if (padrao) { padrao.addTo(map); }
+            } catch (err) {
+                padrao = null;
+                console.warn('Hachura indisponível para ' + id, err);
+            }
 
             function estilo(feature) {
                 var tipo = feature && feature.geometry ? feature.geometry.type : '';
                 if (tipo === 'LineString' || tipo === 'MultiLineString') {
                     return {
-                        pane: paneName, opacity: 1, color: corAtual, weight: opcoes.weight || 3,
-                        dashArray: opcoes.dashArray || '', lineCap: 'round', lineJoin: 'round',
+                        pane: paneName, opacity: 1, color: corAtual, weight: c.weight || 3,
+                        dashArray: c.dashArray || '', lineCap: 'round', lineJoin: 'round',
                         fill: false, interactive: true
                     };
                 }
                 return {
-                    pane: paneName, opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1.0,
+                    pane: paneName, opacity: 1, color: padrao ? corAtual : borda, weight: padrao ? 1.5 : 1.0,
                     dashArray: '', lineCap: 'butt', lineJoin: 'miter',
-                    fill: true, fillOpacity: 1, fillColor: corAtual, interactive: true
+                    fill: true, fillOpacity: 1, fillColor: padrao ? 'rgba(0,0,0,0)' : corAtual,
+                    fillPattern: padrao || undefined, interactive: true
                 };
             }
 
@@ -1281,6 +1341,12 @@
                 layerName: 'layer_' + id + '_' + num,
                 pane: paneName,
                 pointToLayer: function(feature, latlng) {
+                    if (c.icone) {
+                        return L.marker(latlng, {
+                            pane: paneName,
+                            icon: L.icon({ iconUrl: c.icone, iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] })
+                        });
+                    }
                     return L.circleMarker(latlng, {
                         pane: paneName, radius: 6, opacity: 1, color: 'rgba(35,35,35,1.0)',
                         weight: 1.0, fill: true, fillOpacity: 1, fillColor: corAtual, interactive: true
@@ -1300,7 +1366,7 @@
                                 layer.eachLayer(function(f) { f.closePopup(); });
                             }
                         },
-                        mouseover: highlightFeature
+                        mouseover: destacarSeguro
                     });
                     var content = conteudoPopupGenerico(feature);
                     layer.on('popupopen', function(e) {
@@ -1310,7 +1376,11 @@
                 },
                 style: estilo
             });
-            camada.definirCor = function(nova) { corAtual = nova; camada.setStyle(estilo); };
+            camada.definirCor = function(nova) {
+                corAtual = nova;
+                if (padrao) { recolorirPadrao(padrao, nova); }
+                camada.setStyle(estilo);
+            };
             bounds_group.addLayer(camada);
             window['layer_' + id + '_' + num] = camada; // desativada por padrão
             return camada;
@@ -1326,34 +1396,34 @@
             { k: 'DROGASDOSERTOEBORRACHA_6', nome: 'Drogas do Sertão e Borracha', cor: 'rgba(224,131,242,0.6)', grupo: GRUPOS[0] },
             { k: 'MATE_7', nome: 'Mate', cor: 'rgba(161,183,164,0.6)', grupo: GRUPOS[0] },
             { k: 'PECUARIA_8', nome: 'Pecuária', cor: 'rgba(88,121,74,0.6)', grupo: GRUPOS[0] },
-            { k: 'ALGODO_9', nome: 'Algodão', cor: 'rgba(218,226,236,0.65)', corClara: 'rgba(96,125,153,0.7)', grupo: GRUPOS[0], gen: true },
+            { k: 'ALGODO_9', nome: 'Algodão', cor: 'rgba(109,139,175,1.0)', borda: 'rgba(56,71,89,1.0)', grupo: GRUPOS[0], gen: true },
 
-            { k: 'CAMINHODASMISSOES_10', nome: 'Caminho das Missões', cor: 'rgba(255,127,0,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
-            { k: 'CAMINHOSALTERNATIVOS_11', nome: 'Caminhos Alternativos', cor: 'rgba(166,86,40,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
-            { k: 'CAMINHODAVACARIADOSPINHAIS_12', nome: 'Caminho da Vacaria dos Pinhais', cor: 'rgba(152,78,163,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
-            { k: 'CAMINHODAPRAIA_13', nome: 'Caminho da Praia', cor: 'rgba(0,188,212,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
-            { k: 'CAMINHOSDASTROPAS_14', nome: 'Caminhos das Tropas', cor: 'rgba(228,26,28,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
+            { k: 'CAMINHODASMISSOES_10', nome: 'Caminho das Missões', cor: 'rgba(84,176,74,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
+            { k: 'CAMINHOSALTERNATIVOS_11', nome: 'Caminhos Alternativos', cor: 'rgba(255,255,255,1.0)', halo: 'drop-shadow(0 0 1px rgba(107,107,107,0.95)) drop-shadow(0 0 1px rgba(107,107,107,0.95))', grupo: GRUPOS[1], tipo: 'linha', gen: true },
+            { k: 'CAMINHODAVACARIADOSPINHAIS_12', nome: 'Caminho da Vacaria dos Pinhais', cor: 'rgba(253,136,136,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
+            { k: 'CAMINHODAPRAIA_13', nome: 'Caminho da Praia', cor: 'rgba(166,206,227,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
+            { k: 'CAMINHOSDASTROPAS_14', nome: 'Caminhos das Tropas', cor: 'rgba(227,26,28,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
 
-            { k: 'ALEMES_15', nome: 'Alemães', cor: 'rgba(55,126,184,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'ITALIANOS_16', nome: 'Italianos', cor: 'rgba(77,175,74,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'AORIANOS_17', nome: 'Açorianos', cor: 'rgba(247,129,191,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'OUTRASETNIAS_18', nome: 'Outras Etnias', cor: 'rgba(153,153,153,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'ZONASDEMATA_20', nome: 'Zonas de Mata', cor: 'rgba(27,120,55,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'ZONASDECOLONIZAOMISTA_21', nome: 'Zonas de Colonização Mista', cor: 'rgba(191,129,45,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'ZONASCOLONIZADASPORITALIANOS_22', nome: 'Zonas Colonizadas por Italianos', cor: 'rgba(77,175,74,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'ZONASCOLONIZADASPORAORIANOS_23', nome: 'Zonas Colonizadas por Açorianos', cor: 'rgba(247,129,191,0.6)', grupo: GRUPOS[2], gen: true },
-            { k: 'ZONASCOLONIZADASPORALEMES_24', nome: 'Zonas Colonizadas por Alemães', cor: 'rgba(55,126,184,0.6)', grupo: GRUPOS[2], gen: true },
+            { k: 'ALEMES_15', nome: 'Alemães', cor: 'rgba(183,28,144,1.0)', grupo: GRUPOS[2], tipo: 'linha', gen: true },
+            { k: 'ITALIANOS_16', nome: 'Italianos', cor: 'rgba(255,107,0,1.0)', grupo: GRUPOS[2], tipo: 'linha', gen: true },
+            { k: 'AORIANOS_17', nome: 'Açorianos', cor: 'rgba(90,123,168,1.0)', grupo: GRUPOS[2], tipo: 'linha', gen: true },
+            { k: 'OUTRASETNIAS_18', nome: 'Outras Etnias', cor: 'rgba(44,207,185,1.0)', grupo: GRUPOS[2], tipo: 'linha', gen: true },
+            { k: 'ZONASDEMATA_20', nome: 'Zonas de Mata', cor: 'rgba(19,83,42,0.8)', borda: 'rgba(17,72,37,0.9)', grupo: GRUPOS[2], gen: true },
+            { k: 'ZONASDECOLONIZAOMISTA_21', nome: 'Zonas de Colonização Mista', cor: 'rgba(205,205,205,0.95)', corClara: 'rgba(120,126,132,0.95)', tipo: 'hachuraX', grupo: GRUPOS[2], gen: true },
+            { k: 'ZONASCOLONIZADASPORITALIANOS_22', nome: 'Zonas Colonizadas por Italianos', cor: 'rgba(191,224,203,1.0)', corClara: 'rgba(79,154,107,1.0)', tipo: 'hachura', angulo: 45, grupo: GRUPOS[2], gen: true },
+            { k: 'ZONASCOLONIZADASPORAORIANOS_23', nome: 'Zonas Colonizadas por Açorianos', cor: 'rgba(255,255,67,1.0)', borda: 'rgba(147,147,51,1.0)', grupo: GRUPOS[2], gen: true },
+            { k: 'ZONASCOLONIZADASPORALEMES_24', nome: 'Zonas Colonizadas por Alemães', cor: 'rgba(255,227,227,1.0)', corClara: 'rgba(217,119,127,1.0)', tipo: 'hachura', angulo: -45, grupo: GRUPOS[2], gen: true },
 
-            { k: 'REDUES_19', nome: 'Reduções', cor: 'rgba(255,127,0,0.8)', grupo: GRUPOS[3], gen: true },
-            { k: 'PRINCIPAISRUMOSDEPENETRAODOSBANDEIRANTES_25', nome: 'Rumos dos Bandeirantes', cor: 'rgba(217,95,2,1.0)', grupo: GRUPOS[3], tipo: 'linha', gen: true },
-            { k: 'TORDESILHAS_26', nome: 'Tordesilhas', cor: 'rgba(255,255,255,1.0)', corClara: 'rgba(16,34,47,1.0)', acento: 'rgb(16,34,47)', grupo: GRUPOS[3], tipo: 'tracejada', opcoes: { weight: 3, dashArray: '10,6' }, gen: true }
+            { k: 'REDUES_19', nome: 'Reduções', cor: 'rgba(136,0,0,1.0)', icone: 'markers/REDUES_19.svg', tipo: 'icone', grupo: GRUPOS[3], gen: true },
+            { k: 'PRINCIPAISRUMOSDEPENETRAODOSBANDEIRANTES_25', nome: 'Rumos dos Bandeirantes', cor: 'rgba(255,255,255,1.0)', corClara: 'rgba(59,74,87,1.0)', halo: 'drop-shadow(0 0 3px rgba(255,255,255,0.7))', grupo: GRUPOS[3], tipo: 'linha', gen: true },
+            { k: 'TORDESILHAS_26', nome: 'Tordesilhas', cor: 'rgba(219,30,42,1.0)', weight: 2.5, grupo: GRUPOS[3], tipo: 'linha', gen: true }
         ];
 
         INFO_CAMADAS.forEach(function(c) {
             if (!c.gen) { return; }
             var m = c.k.match(/^(.*)_(\d+)$/);
             try {
-                criarCamadaGenerica(m[1], parseInt(m[2], 10), c.cor, c.opcoes);
+                criarCamadaGenerica(m[1], parseInt(m[2], 10), c);
             } catch (err) {
                 console.error('Falha ao criar a camada ' + c.k, err);
             }
@@ -1418,8 +1488,18 @@
         // ===== Painel lateral: mapa base e camadas =====
         function semAcento(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
         function amostra(c) {
+            if (c.tipo === 'icone') {
+                return '<i class="sw icone" aria-hidden="true"><img src="' + c.icone + '" alt=""></i>';
+            }
+            if (c.tipo === 'hachura') {
+                var ang = c.angulo > 0 ? 45 : 135;
+                return '<i class="sw" aria-hidden="true"><b style="background:repeating-linear-gradient(' + ang + 'deg,' + c.cor + ' 0 2px,transparent 2px 5px)"></b></i>';
+            }
+            if (c.tipo === 'hachuraX') {
+                return '<i class="sw" aria-hidden="true"><b style="background:repeating-linear-gradient(45deg,' + c.cor + ' 0 1.5px,transparent 1.5px 5px),repeating-linear-gradient(135deg,' + c.cor + ' 0 1.5px,transparent 1.5px 5px)"></b></i>';
+            }
             var classe = c.tipo === 'linha' ? 'sw linha' : (c.tipo === 'tracejada' ? 'sw tracejada' : 'sw');
-            return '<i class="' + classe + '" aria-hidden="true"><b style="--c:' + c.cor + '"></b></i>';
+            return '<i class="' + classe + '" aria-hidden="true"><b style="--c:' + c.cor + ';--b:' + (c.borda || 'transparent') + '"></b></i>';
         }
 
         // Mapas de fundo didáticos (sem imagem de satélite)
@@ -1571,6 +1651,130 @@
             document.getElementById('sb-vazio').hidden = achou > 0;
         });
 
+        // ===== Filtro de séculos (lê o campo DATA de cada feição) =====
+        // Convenção: século XVI = anos 1500 a 1599.
+        function romanoParaNumero(r) {
+            var t = { i: 1, v: 5, x: 10, l: 50, c: 100 }, n = 0;
+            r = r.toLowerCase();
+            for (var i = 0; i < r.length; i++) {
+                var a = t[r[i]], b = t[r[i + 1]];
+                if (!a) { return NaN; }
+                n += (b && a < b) ? -a : a;
+            }
+            return n;
+        }
+        function numeroParaRomano(n) {
+            var pares = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']], r = '';
+            pares.forEach(function(p) { while (n >= p[0]) { r += p[1]; n -= p[0]; } });
+            return r;
+        }
+        function lerPeriodo(texto) {
+            if (texto === null || texto === undefined) { return null; }
+            var s = semAcento(String(texto));
+            var anos = (s.match(/\b(1[0-9]{3}|20[0-2][0-9])\b/g) || []).map(Number);
+            if (anos.length) { return [Math.min.apply(null, anos), Math.max.apply(null, anos)]; }
+            var m1 = s.match(/\bsec(?:ulos?|\.)?\s*([ivxl]+)\b(?:\s*(?:ao?|e|-)\s*(?:sec(?:ulos?|\.)?\s*)?([ivxl]+)\b)?/) ||
+                     s.match(/^\s*([ivxl]+)(?:\s*(?:ao?|e|-)\s*([ivxl]+))?\s*$/);
+            if (m1) {
+                var n1 = romanoParaNumero(m1[1]);
+                var n2 = m1[2] ? romanoParaNumero(m1[2]) : n1;
+                if (n1 >= 1 && n1 <= 21 && n2 >= 1 && n2 <= 21) { return [(n1 - 1) * 100, Math.max(n1, n2) * 100 - 1]; }
+            }
+            return null;
+        }
+        function valorDeData(props) {
+            var achados = {};
+            Object.keys(props || {}).forEach(function(k) { achados[semAcento(k).toUpperCase()] = props[k]; });
+            var chaves = ['DATA', 'PERIODO', 'SECULO', 'ANO'];
+            for (var i = 0; i < chaves.length; i++) {
+                var v = achados[chaves[i]];
+                if (v !== undefined && v !== null && v !== '') { return v; }
+            }
+            return null;
+        }
+
+        var seculosSel = {};
+        var seculosPresentes = {};
+        var totalFeicoes = 0, comPeriodo = 0, naoReconhecidas = {}, camadasSemData = [];
+        INFO_CAMADAS.forEach(function(c) {
+            var l = window['layer_' + c.k];
+            if (!l || !l.getLayers) { return; }
+            l._todas = l.getLayers();
+            var datadas = 0;
+            l._todas.forEach(function(sub) {
+                totalFeicoes++;
+                var bruto = valorDeData(sub.feature && sub.feature.properties);
+                sub._periodo = lerPeriodo(bruto);
+                if (sub._periodo) {
+                    comPeriodo++;
+                    datadas++;
+                    for (var n = Math.floor(sub._periodo[0] / 100) + 1; n <= Math.floor(sub._periodo[1] / 100) + 1; n++) {
+                        if (n >= 1 && n <= 21) { seculosPresentes[n] = true; }
+                    }
+                } else if (bruto !== null) {
+                    (naoReconhecidas[c.nome] = naoReconhecidas[c.nome] || {})[String(bruto)] = true;
+                }
+            });
+            if (l._todas.length && !datadas) { camadasSemData.push(c.nome); }
+        });
+        if (Object.keys(naoReconhecidas).length && window.console) {
+            console.info('Valores de DATA que o filtro de séculos não reconheceu:', naoReconhecidas);
+        }
+
+        function aplicarPeriodo() {
+            var faixas = Object.keys(seculosSel).map(function(n) { return [(n - 1) * 100, n * 100 - 1]; });
+            function passa(p) {
+                if (!faixas.length || !p) { return true; }   // sem data: continua visível
+                return faixas.some(function(f) { return p[0] <= f[1] && p[1] >= f[0]; });
+            }
+            itens.forEach(function(it) {
+                var l = window['layer_' + it.c.k];
+                if (!l || !l._todas) { return; }
+                var visiveis = l._todas.filter(function(s) { return passa(s._periodo); });
+                l.clearLayers();
+                visiveis.forEach(function(s) { l.addLayer(s); });
+                var vazia = faixas.length > 0 && visiveis.length === 0 && l._todas.length > 0;
+                it.li.classList.toggle('vazia', vazia);
+                it.li.title = vazia ? 'Sem registros no período escolhido' : '';
+            });
+            Array.prototype.forEach.call(document.getElementById('sb-seculos').children, function(b) {
+                b.setAttribute('aria-pressed', String(!!seculosSel[b.getAttribute('data-n')]));
+            });
+            document.getElementById('sb-seculos-limpar').disabled = !faixas.length;
+        }
+
+        var seculosEl = document.getElementById('sb-seculos');
+        (function() {
+            var ns = Object.keys(seculosPresentes).map(Number), lista = [];
+            for (var n = Math.min.apply(null, ns); n <= Math.max.apply(null, ns); n++) { lista.push(n); }
+            return lista;
+        })().forEach(function(n) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = numeroParaRomano(n);
+            b.setAttribute('data-n', n);
+            b.setAttribute('aria-pressed', 'false');
+            b.setAttribute('aria-label', 'Século ' + numeroParaRomano(n));
+            b.addEventListener('click', function() {
+                if (seculosSel[n]) { delete seculosSel[n]; } else { seculosSel[n] = true; }
+                aplicarPeriodo();
+            });
+            seculosEl.appendChild(b);
+        });
+        document.getElementById('sb-seculos-limpar').addEventListener('click', function() {
+            seculosSel = {};
+            aplicarPeriodo();
+        });
+        var notaEl = document.getElementById('sb-seculos-nota');
+        if (comPeriodo === 0) {
+            notaEl.textContent = 'Não encontrei datas reconhecíveis no campo DATA das camadas, por isso o filtro está indisponível.';
+        } else if (camadasSemData.length) {
+            notaEl.textContent = camadasSemData.length + (camadasSemData.length === 1 ? ' camada sem data fica sempre visível.' : ' camadas sem data ficam sempre visíveis.');
+            notaEl.title = 'Sem data: ' + camadasSemData.join(', ');
+        } else {
+            notaEl.textContent = 'Todas as camadas têm data.';
+        }
+
         // ===== Texto explicativo de cada camada (edite aqui para ajustar os textos) =====
         var TEXTOS_CAMADAS = {
             "FUMO_2": [
@@ -1675,6 +1879,25 @@
             ]
         };
 
+        function escaparHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function fontesHtml(c) {
+            var l = window['layer_' + c.k];
+            var rotulos = { 'FONTE': 'Fonte', 'FONTE MAPA': 'Fonte do mapa', 'FONTE INFO': 'Fonte das informações' };
+            var vistos = {}, partes = [];
+            ((l && l._todas) || []).forEach(function(sub) {
+                var p = (sub.feature && sub.feature.properties) || {};
+                Object.keys(rotulos).forEach(function(k) {
+                    var v = p[k];
+                    if (v === undefined || v === null || v === '') { return; }
+                    var texto = String(v).replace(/\s+/g, ' ').trim();
+                    if (vistos[k + '|' + texto]) { return; }
+                    vistos[k + '|' + texto] = true;
+                    partes.push('<span><strong>' + rotulos[k] + '</strong>' + autolinker.link(escaparHtml(texto)) + '</span>');
+                });
+            });
+            return partes.length ? '<div class="ic-fonte">' + partes.join('') + '</div>' : '';
+        }
+
         var infoEl = document.getElementById('info-camada');
         var infoAtual = null; // { c, grupo, gatilho }
 
@@ -1692,7 +1915,7 @@
             document.getElementById('ic-grupo').innerHTML = amostra(c) + '<span>' + grupoNome + '</span>';
             document.getElementById('ic-titulo').textContent = c.nome;
             var paragrafos = TEXTOS_CAMADAS[c.k] || ['O texto explicativo desta camada ainda não foi cadastrado.'];
-            document.getElementById('ic-corpo').innerHTML = paragrafos.map(function(t) { return '<p>' + t + '</p>'; }).join('');
+            document.getElementById('ic-corpo').innerHTML = paragrafos.map(function(t) { return '<p>' + t + '</p>'; }).join('') + fontesHtml(c);
             if (gatilho) { gatilho.classList.add('ativo'); gatilho.setAttribute('aria-expanded', 'true'); }
             infoEl.hidden = false;
             document.getElementById('ic-corpo').scrollTop = 0;
