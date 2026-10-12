@@ -350,6 +350,109 @@
         .ic-fonte strong { display: block; font-weight: 700; color: var(--ink); }
         .ic-fonte a { color: var(--verde); overflow-wrap: anywhere; }
 
+        /* ================= Linha do tempo ================= */
+        .leaflet-container .linha-tempo {
+            position: absolute;
+            z-index: 850;
+            left: 14px;
+            right: 240px;
+            bottom: 28px;
+            max-width: 760px;
+            padding: 10px 18px 8px;
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid var(--hair);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            color: var(--ink);
+            font-family: var(--sans);
+            cursor: default;
+        }
+        .linha-tempo .lt-cab { display: flex; align-items: center; gap: 10px; }
+        .linha-tempo .lt-liga { position: relative; display: flex; align-items: center; gap: 9px; margin-right: auto; font: 600 13px/1 var(--sans); white-space: nowrap; cursor: pointer; }
+        .linha-tempo .lt-ano { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+        .linha-tempo .lt-ano b { font: 700 24px/1 var(--titulo); letter-spacing: -0.01em; color: var(--verde); font-variant-numeric: tabular-nums; }
+        .linha-tempo .lt-ano span { font: 600 12px/1 var(--sans); color: var(--ink-2); }
+        .linha-tempo .lt-ano .sem { font-size: 12.5px; }
+        .linha-tempo .lt-btn {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--hair);
+            border-radius: 50%;
+            background: #fff;
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: background-color .15s, color .15s, border-color .15s;
+        }
+        .linha-tempo .lt-btn:hover { border-color: var(--verde); color: var(--verde); }
+        .linha-tempo #lt-play { background: var(--verde); border-color: var(--verde); color: #fff; }
+        .linha-tempo #lt-play:hover { background: var(--verde-escuro); }
+        .linha-tempo #lt-min svg { transition: transform .18s ease; }
+        .linha-tempo.min #lt-min svg { transform: rotate(180deg); }
+        .linha-tempo.min .lt-corpo { display: none; }
+        .linha-tempo button:focus-visible, .linha-tempo input:focus-visible + .trilho { outline: 2px solid var(--verde); outline-offset: 2px; }
+
+        .linha-tempo input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            display: block;
+            width: 100%;
+            height: 26px;
+            margin: 8px 0 0;
+            background: transparent;
+            cursor: pointer;
+            --p: 0%;
+        }
+        .linha-tempo input[type=range]::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #aebbc4 var(--p), #dfe6ea var(--p));
+        }
+        .linha-tempo.ativa input[type=range]::-webkit-slider-runnable-track {
+            background: linear-gradient(90deg, var(--verde) var(--p), #dfe6ea var(--p));
+        }
+        .linha-tempo input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            margin-top: -7px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #9aa9b3;
+            box-shadow: 0 1px 4px rgba(16, 34, 47, 0.35);
+        }
+        .linha-tempo.ativa input[type=range]::-webkit-slider-thumb { border-color: var(--verde); }
+        .linha-tempo input[type=range]::-moz-range-track { height: 6px; border-radius: 999px; background: #dfe6ea; }
+        .linha-tempo input[type=range]::-moz-range-progress { height: 6px; border-radius: 999px; background: #aebbc4; }
+        .linha-tempo.ativa input[type=range]::-moz-range-progress { background: var(--verde); }
+        .linha-tempo input[type=range]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #9aa9b3;
+            box-shadow: 0 1px 4px rgba(16, 34, 47, 0.35);
+        }
+        .linha-tempo.ativa input[type=range]::-moz-range-thumb { border-color: var(--verde); }
+        .linha-tempo input[type=range]:focus-visible { outline: 2px solid var(--verde); outline-offset: 2px; border-radius: 6px; }
+
+        .linha-tempo .lt-escala { position: relative; height: 30px; margin: 0 10px; pointer-events: none; }
+        .linha-tempo .lt-tick { position: absolute; top: 0; width: 1px; height: 5px; background: rgba(16, 34, 47, 0.3); }
+        .linha-tempo .lt-tick.m { height: 8px; }
+        .linha-tempo .lt-tick.c { height: 11px; background: rgba(16, 34, 47, 0.6); }
+        .linha-tempo .lt-rot { position: absolute; top: 14px; transform: translateX(-50%); font: 600 11.5px/1 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+        .linha-tempo .lt-nota { margin: 0 0 2px; font: 400 12px/1.4 var(--sans); color: var(--ink-2); }
+        @media (max-width: 1000px) {
+            .leaflet-container .atlas-readout { display: none; }
+            .leaflet-container .linha-tempo { right: 150px; }
+        }
+        @media (max-width: 760px) {
+            .leaflet-container .linha-tempo { left: 10px; right: 10px; bottom: 58px; padding: 8px 14px 6px; max-width: none; }
+            .linha-tempo .lt-nota, .linha-tempo .lt-ano .sem { display: none; }
+            .linha-tempo .lt-ano b { font-size: 21px; }
+        }
+
         /* ================= Texto explicativo da camada ================= */
         #info-camada, #info-camada * { box-sizing: border-box; }
         #info-camada {
@@ -1723,17 +1826,27 @@
 
         function aplicarPeriodo() {
             var faixas = Object.keys(seculosSel).map(function(n) { return [(n - 1) * 100, n * 100 - 1]; });
-            function passa(p) {
+            var ano = linhaDoTempo.ativa ? linhaDoTempo.ano : null;
+            function passaSeculo(p) {
                 if (!faixas.length || !p) { return true; }   // sem data: continua visível
                 return faixas.some(function(f) { return p[0] <= f[1] && p[1] >= f[0]; });
             }
+            function passaAno(e) {
+                if (ano === null || !e) { return true; }     // sem período de existência: continua visível
+                return e[0] <= ano && ano <= e[1];
+            }
+            var filtrando = faixas.length > 0 || ano !== null;
             itens.forEach(function(it) {
                 var l = window['layer_' + it.c.k];
                 if (!l || !l._todas) { return; }
-                var visiveis = l._todas.filter(function(s) { return passa(s._periodo); });
-                l.clearLayers();
-                visiveis.forEach(function(s) { l.addLayer(s); });
-                var vazia = faixas.length > 0 && visiveis.length === 0 && l._todas.length > 0;
+                var visiveis = l._todas.filter(function(s) { return passaSeculo(s._periodo) && passaAno(s._existencia); });
+                var chave = visiveis.map(function(s) { return L.stamp(s); }).join(',');
+                if (l._chave !== chave) {          // só mexe no mapa se algo mudou
+                    l.clearLayers();
+                    visiveis.forEach(function(s) { l.addLayer(s); });
+                    l._chave = chave;
+                }
+                var vazia = filtrando && visiveis.length === 0 && l._todas.length > 0;
                 it.li.classList.toggle('vazia', vazia);
                 it.li.title = vazia ? 'Sem registros no período escolhido' : '';
             });
@@ -1774,6 +1887,176 @@
         } else {
             notaEl.textContent = 'Todas as camadas têm data.';
         }
+
+        // ===== Linha do tempo: de 1500 até hoje =====
+        // Mostra só o que existia no ano escolhido. O período de existência vem, em ordem, de:
+        //   1) campos INICIO e FIM de cada feição (na tabela de atributos do QGIS), ou
+        //   2) da tabela abaixo, por camada (use null no fim para "até hoje").
+        // Sem nenhum dos dois, a camada fica sempre visível.
+        var PERIODOS_CAMADAS = {
+            // 'FUMO_2': [1800, 1899],
+            // 'TORDESILHAS_26': [1494, 1750],
+            // 'ALEMES_15': [1824, null]
+        };
+
+        var ANO_MIN = 1500, ANO_MAX = new Date().getFullYear();
+        var linhaDoTempo = { ativa: false, ano: ANO_MIN };
+        var camadasSemExistencia = [], comExistencia = 0;
+
+        function lerExistencia(props, k) {
+            var achados = {};
+            Object.keys(props || {}).forEach(function(n) { achados[semAcento(n).toUpperCase()] = props[n]; });
+            function pega(chaves) {
+                for (var i = 0; i < chaves.length; i++) {
+                    var v = achados[chaves[i]];
+                    if (v !== undefined && v !== null && String(v).trim() !== '') { return v; }
+                }
+                return null;
+            }
+            var vi = pega(['INICIO', 'ANO_INICIO', 'DATA_INICIO', 'INICIO_ANO']);
+            var vf = pega(['FIM', 'ANO_FIM', 'DATA_FIM', 'FIM_ANO', 'TERMINO']);
+            var ini = null, fim = null;
+            if (vi !== null) { var pi = lerPeriodo(vi); if (pi) { ini = pi[0]; } }
+            if (vf !== null) { var pf = lerPeriodo(vf); if (pf) { fim = pf[1]; } }
+            if (ini === null && fim === null) {
+                var t = PERIODOS_CAMADAS[k];
+                if (!t) { return null; }
+                ini = (t[0] === null || t[0] === undefined) ? null : t[0];
+                fim = (t[1] === null || t[1] === undefined) ? null : t[1];
+                if (ini === null && fim === null) { return null; }
+            }
+            if (ini === null) { ini = -Infinity; }
+            if (fim === null) { fim = Infinity; }      // sem fim: continua até hoje
+            return ini <= fim ? [ini, fim] : [fim, ini];
+        }
+        function lerExistenciaTodas() {
+            comExistencia = 0;
+            camadasSemExistencia = [];
+            INFO_CAMADAS.forEach(function(c) {
+                var l = window['layer_' + c.k];
+                if (!l || !l._todas) { return; }
+                var n = 0;
+                l._todas.forEach(function(sub) {
+                    sub._existencia = lerExistencia(sub.feature && sub.feature.properties, c.k);
+                    if (sub._existencia) { n++; comExistencia++; }
+                });
+                if (l._todas.length && !n) { camadasSemExistencia.push(c.nome); }
+            });
+        }
+        lerExistenciaTodas();
+
+        var ltEl = L.DomUtil.create('div', 'linha-tempo', map.getContainer());
+        ltEl.id = 'linha-tempo';
+        ltEl.setAttribute('role', 'group');
+        ltEl.setAttribute('aria-label', 'Linha do tempo');
+        ltEl.innerHTML =
+            '<div class="lt-cab">' +
+                '<label class="lt-liga"><input type="checkbox" id="lt-ativa" class="sb-in"><span class="trilho"></span><span>Filtrar por ano</span></label>' +
+                '<div class="lt-ano" id="lt-ano" aria-live="polite"></div>' +
+                '<button type="button" class="lt-btn" id="lt-play" aria-label="Reproduzir a linha do tempo" title="Reproduzir"></button>' +
+                '<button type="button" class="lt-btn" id="lt-min" aria-label="Recolher a linha do tempo" aria-expanded="true" title="Recolher">' +
+                    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="lt-corpo">' +
+                '<input type="range" id="lt-range" min="' + ANO_MIN + '" max="' + ANO_MAX + '" step="1" value="' + ANO_MIN + '" aria-label="Ano">' +
+                '<div class="lt-escala" id="lt-escala" aria-hidden="true"></div>' +
+                '<p class="lt-nota" id="lt-nota"></p>' +
+            '</div>';
+        L.DomEvent.disableClickPropagation(ltEl);
+        L.DomEvent.disableScrollPropagation(ltEl);
+
+        // Marcas da escala: uma a cada 10 anos e o rótulo a cada século
+        (function() {
+            var esc = document.getElementById('lt-escala');
+            for (var a = ANO_MIN; a <= ANO_MAX; a += 10) {
+                var pct = (a - ANO_MIN) / (ANO_MAX - ANO_MIN) * 100;
+                var t = document.createElement('i');
+                t.className = 'lt-tick' + (a % 100 === 0 ? ' c' : (a % 50 === 0 ? ' m' : ''));
+                t.style.left = pct + '%';
+                esc.appendChild(t);
+                if (a % 100 === 0) {
+                    var r = document.createElement('span');
+                    r.className = 'lt-rot';
+                    r.style.left = pct + '%';
+                    r.textContent = a;
+                    esc.appendChild(r);
+                }
+            }
+        })();
+
+        var ltRange = document.getElementById('lt-range');
+        var ICON_PLAY = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>';
+        var ICON_PAUSE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+        var reproduzindo = null, quadroPendente = null;
+
+        function atualizarLinhaDoTempo() {
+            var pct = (linhaDoTempo.ano - ANO_MIN) / (ANO_MAX - ANO_MIN) * 100;
+            ltRange.style.setProperty('--p', pct + '%');
+            ltRange.value = linhaDoTempo.ano;
+            ltEl.classList.toggle('ativa', linhaDoTempo.ativa);
+            document.getElementById('lt-ativa').checked = linhaDoTempo.ativa;
+            document.getElementById('lt-ano').innerHTML = linhaDoTempo.ativa
+                ? '<b>' + linhaDoTempo.ano + '</b><span>séc. ' + numeroParaRomano(Math.floor(linhaDoTempo.ano / 100) + 1) + '</span>'
+                : '<span class="sem">Todos os anos</span>';
+            document.getElementById('lt-play').innerHTML = reproduzindo ? ICON_PAUSE : ICON_PLAY;
+            document.getElementById('lt-play').setAttribute('aria-label', reproduzindo ? 'Pausar' : 'Reproduzir a linha do tempo');
+        }
+        function atualizarNotaLinhaDoTempo() {
+            var nota = document.getElementById('lt-nota');
+            nota.title = '';
+            if (!comExistencia) {
+                nota.textContent = 'Ainda não há períodos de existência cadastrados (campos INICIO e FIM): todas as camadas continuam visíveis.';
+            } else if (camadasSemExistencia.length) {
+                nota.textContent = camadasSemExistencia.length + (camadasSemExistencia.length === 1 ? ' camada sem período fica sempre visível.' : ' camadas sem período ficam sempre visíveis.');
+                nota.title = 'Sem período: ' + camadasSemExistencia.join(', ');
+            } else {
+                nota.textContent = 'Todas as camadas têm período de existência.';
+            }
+        }
+        function pedirAplicacao() {
+            if (quadroPendente) { return; }
+            quadroPendente = requestAnimationFrame(function() { quadroPendente = null; aplicarPeriodo(); });
+        }
+        function pararReproducao() {
+            if (reproduzindo) { clearInterval(reproduzindo); reproduzindo = null; }
+            atualizarLinhaDoTempo();
+        }
+        function reproduzir() {
+            if (reproduzindo) { pararReproducao(); return; }
+            if (!linhaDoTempo.ativa || linhaDoTempo.ano >= ANO_MAX) { linhaDoTempo.ano = ANO_MIN; }
+            linhaDoTempo.ativa = true;
+            reproduzindo = setInterval(function() {
+                linhaDoTempo.ano = Math.min(ANO_MAX, linhaDoTempo.ano + 2);
+                atualizarLinhaDoTempo();
+                pedirAplicacao();
+                if (linhaDoTempo.ano >= ANO_MAX) { pararReproducao(); }
+            }, 60);
+            atualizarLinhaDoTempo();
+            pedirAplicacao();
+        }
+
+        ltRange.addEventListener('input', function() {
+            linhaDoTempo.ano = parseInt(ltRange.value, 10);
+            linhaDoTempo.ativa = true;               // arrastar já liga o filtro
+            if (reproduzindo) { pararReproducao(); }
+            atualizarLinhaDoTempo();
+            pedirAplicacao();
+        });
+        document.getElementById('lt-ativa').addEventListener('change', function(e) {
+            linhaDoTempo.ativa = e.target.checked;
+            if (!linhaDoTempo.ativa && reproduzindo) { pararReproducao(); }
+            atualizarLinhaDoTempo();
+            aplicarPeriodo();
+        });
+        document.getElementById('lt-play').addEventListener('click', reproduzir);
+        document.getElementById('lt-min').addEventListener('click', function(e) {
+            var recolhida = ltEl.classList.toggle('min');
+            e.currentTarget.setAttribute('aria-expanded', String(!recolhida));
+            e.currentTarget.setAttribute('aria-label', recolhida ? 'Expandir a linha do tempo' : 'Recolher a linha do tempo');
+        });
+        atualizarLinhaDoTempo();
+        atualizarNotaLinhaDoTempo();
 
         // ===== Texto explicativo de cada camada (edite aqui para ajustar os textos) =====
         var TEXTOS_CAMADAS = {
