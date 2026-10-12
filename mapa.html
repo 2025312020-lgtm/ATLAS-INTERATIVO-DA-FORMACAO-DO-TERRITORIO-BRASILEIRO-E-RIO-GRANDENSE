@@ -323,23 +323,6 @@
             border-radius: 6px;
         }
 
-        /* ================= Filtro de séculos ================= */
-        .seculos { display: flex; flex-wrap: wrap; gap: 4px; }
-        .seculos button {
-            min-width: 40px;
-            height: 32px;
-            padding: 0 8px;
-            border: 1px solid var(--hair);
-            border-radius: 999px;
-            background: #fff;
-            color: var(--ink-2);
-            font: 600 12.5px/1 var(--sans);
-            cursor: pointer;
-            transition: background-color .15s, border-color .15s, color .15s;
-        }
-        .seculos button:hover:not(:disabled) { border-color: var(--verde); color: var(--verde); }
-        .seculos button[aria-pressed="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
-        .sb-nota { margin: 10px 0 0; font: 400 12.5px/1.45 var(--sans); color: var(--ink-2); }
         .item.vazia .nome { opacity: 0.45; }
 
         .sw b { box-shadow: inset 0 0 0 1px var(--b, transparent); }
@@ -664,15 +647,6 @@
                 <section class="sb-sec">
                     <h2>Mapa base</h2>
                     <div class="seg" id="sb-bases" role="radiogroup" aria-label="Mapa base"></div>
-                </section>
-                <section class="sb-sec">
-                    <div class="sb-sec-head">
-                        <h2>Filtrar por século</h2>
-                        <button type="button" class="sb-link" id="sb-seculos-limpar" disabled>Ver todos</button>
-                    </div>
-                    <p class="sb-dica">Mostra só o que aconteceu nos séculos escolhidos.</p>
-                    <div class="seculos" id="sb-seculos" role="group" aria-label="Filtrar por século"></div>
-                    <p class="sb-nota" id="sb-seculos-nota"></p>
                 </section>
                 <section class="sb-sec">
                     <div class="sb-sec-head">
@@ -1754,8 +1728,14 @@
             document.getElementById('sb-vazio').hidden = achou > 0;
         });
 
-        // ===== Filtro de séculos (lê o campo DATA de cada feição) =====
-        // Convenção: século XVI = anos 1500 a 1599.
+        // ===== Base da linha do tempo =====
+        // Guarda a lista completa de feições de cada camada, para poder escondê-las e mostrá-las.
+        INFO_CAMADAS.forEach(function(c) {
+            var l = window['layer_' + c.k];
+            if (l && l.getLayers) { l._todas = l.getLayers(); }
+        });
+
+        // Leitura de anos e séculos em textos (convenção: século XVI = anos 1500 a 1599)
         function romanoParaNumero(r) {
             var t = { i: 1, v: 5, x: 10, l: 50, c: 100 }, n = 0;
             r = r.toLowerCase();
@@ -1785,107 +1765,27 @@
             }
             return null;
         }
-        function valorDeData(props) {
-            var achados = {};
-            Object.keys(props || {}).forEach(function(k) { achados[semAcento(k).toUpperCase()] = props[k]; });
-            var chaves = ['DATA', 'PERIODO', 'SECULO', 'ANO'];
-            for (var i = 0; i < chaves.length; i++) {
-                var v = achados[chaves[i]];
-                if (v !== undefined && v !== null && v !== '') { return v; }
-            }
-            return null;
-        }
-
-        var seculosSel = {};
-        var seculosPresentes = {};
-        var totalFeicoes = 0, comPeriodo = 0, naoReconhecidas = {}, camadasSemData = [];
-        INFO_CAMADAS.forEach(function(c) {
-            var l = window['layer_' + c.k];
-            if (!l || !l.getLayers) { return; }
-            l._todas = l.getLayers();
-            var datadas = 0;
-            l._todas.forEach(function(sub) {
-                totalFeicoes++;
-                var bruto = valorDeData(sub.feature && sub.feature.properties);
-                sub._periodo = lerPeriodo(bruto);
-                if (sub._periodo) {
-                    comPeriodo++;
-                    datadas++;
-                    for (var n = Math.floor(sub._periodo[0] / 100) + 1; n <= Math.floor(sub._periodo[1] / 100) + 1; n++) {
-                        if (n >= 1 && n <= 21) { seculosPresentes[n] = true; }
-                    }
-                } else if (bruto !== null) {
-                    (naoReconhecidas[c.nome] = naoReconhecidas[c.nome] || {})[String(bruto)] = true;
-                }
-            });
-            if (l._todas.length && !datadas) { camadasSemData.push(c.nome); }
-        });
-        if (Object.keys(naoReconhecidas).length && window.console) {
-            console.info('Valores de DATA que o filtro de séculos não reconheceu:', naoReconhecidas);
-        }
-
-        function aplicarPeriodo() {
-            var faixas = Object.keys(seculosSel).map(function(n) { return [(n - 1) * 100, n * 100 - 1]; });
+        // Mostra só as feições que existiam no ano escolhido (e tudo, se o filtro estiver desligado)
+        function aplicarLinhaDoTempo() {
             var ano = linhaDoTempo.ativa ? linhaDoTempo.ano : null;
-            function passaSeculo(p) {
-                if (!faixas.length || !p) { return true; }   // sem data: continua visível
-                return faixas.some(function(f) { return p[0] <= f[1] && p[1] >= f[0]; });
-            }
             function passaAno(e) {
                 if (ano === null || !e) { return true; }     // sem período de existência: continua visível
                 return e[0] <= ano && ano <= e[1];
             }
-            var filtrando = faixas.length > 0 || ano !== null;
             itens.forEach(function(it) {
                 var l = window['layer_' + it.c.k];
                 if (!l || !l._todas) { return; }
-                var visiveis = l._todas.filter(function(s) { return passaSeculo(s._periodo) && passaAno(s._existencia); });
+                var visiveis = l._todas.filter(function(s) { return passaAno(s._existencia); });
                 var chave = visiveis.map(function(s) { return L.stamp(s); }).join(',');
                 if (l._chave !== chave) {          // só mexe no mapa se algo mudou
                     l.clearLayers();
                     visiveis.forEach(function(s) { l.addLayer(s); });
                     l._chave = chave;
                 }
-                var vazia = filtrando && visiveis.length === 0 && l._todas.length > 0;
+                var vazia = ano !== null && visiveis.length === 0 && l._todas.length > 0;
                 it.li.classList.toggle('vazia', vazia);
-                it.li.title = vazia ? 'Sem registros no período escolhido' : '';
+                it.li.title = vazia ? 'Sem registros neste ano' : '';
             });
-            Array.prototype.forEach.call(document.getElementById('sb-seculos').children, function(b) {
-                b.setAttribute('aria-pressed', String(!!seculosSel[b.getAttribute('data-n')]));
-            });
-            document.getElementById('sb-seculos-limpar').disabled = !faixas.length;
-        }
-
-        var seculosEl = document.getElementById('sb-seculos');
-        (function() {
-            var ns = Object.keys(seculosPresentes).map(Number), lista = [];
-            for (var n = Math.min.apply(null, ns); n <= Math.max.apply(null, ns); n++) { lista.push(n); }
-            return lista;
-        })().forEach(function(n) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.textContent = numeroParaRomano(n);
-            b.setAttribute('data-n', n);
-            b.setAttribute('aria-pressed', 'false');
-            b.setAttribute('aria-label', 'Século ' + numeroParaRomano(n));
-            b.addEventListener('click', function() {
-                if (seculosSel[n]) { delete seculosSel[n]; } else { seculosSel[n] = true; }
-                aplicarPeriodo();
-            });
-            seculosEl.appendChild(b);
-        });
-        document.getElementById('sb-seculos-limpar').addEventListener('click', function() {
-            seculosSel = {};
-            aplicarPeriodo();
-        });
-        var notaEl = document.getElementById('sb-seculos-nota');
-        if (comPeriodo === 0) {
-            notaEl.textContent = 'Não encontrei datas reconhecíveis no campo DATA das camadas, por isso o filtro está indisponível.';
-        } else if (camadasSemData.length) {
-            notaEl.textContent = camadasSemData.length + (camadasSemData.length === 1 ? ' camada sem data fica sempre visível.' : ' camadas sem data ficam sempre visíveis.');
-            notaEl.title = 'Sem data: ' + camadasSemData.join(', ');
-        } else {
-            notaEl.textContent = 'Todas as camadas têm data.';
         }
 
         // ===== Linha do tempo: de 1500 até hoje =====
@@ -2016,7 +1916,7 @@
         }
         function pedirAplicacao() {
             if (quadroPendente) { return; }
-            quadroPendente = requestAnimationFrame(function() { quadroPendente = null; aplicarPeriodo(); });
+            quadroPendente = requestAnimationFrame(function() { quadroPendente = null; aplicarLinhaDoTempo(); });
         }
         function pararReproducao() {
             if (reproduzindo) { clearInterval(reproduzindo); reproduzindo = null; }
@@ -2047,7 +1947,7 @@
             linhaDoTempo.ativa = e.target.checked;
             if (!linhaDoTempo.ativa && reproduzindo) { pararReproducao(); }
             atualizarLinhaDoTempo();
-            aplicarPeriodo();
+            aplicarLinhaDoTempo();
         });
         document.getElementById('lt-play').addEventListener('click', reproduzir);
         document.getElementById('lt-min').addEventListener('click', function(e) {
