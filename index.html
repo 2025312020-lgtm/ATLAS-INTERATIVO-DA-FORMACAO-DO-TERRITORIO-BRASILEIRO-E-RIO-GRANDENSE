@@ -197,6 +197,7 @@
             .cta { transition: none; }
         }
     </style>
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="hero">
@@ -248,8 +249,17 @@
         </div>
         <div class="links">
             <a href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf" target="_blank" rel="noopener">Ler o TCC (PDF)</a>
-            <a href="mapa.html?feedback=1">Enviar comentários</a>
+            <a id="link-feedback" target="_blank" rel="noopener" hidden>Enviar comentários</a>
         </div>
     </footer>
+    <script>
+        (function () {
+            var url = (typeof FEEDBACK_URL === 'string') ? FEEDBACK_URL.trim() : '';
+            if (!/^https?:\/\//i.test(url)) { return; }
+            var a = document.getElementById('link-feedback');
+            a.href = url;
+            a.hidden = false;
+        })();
+    </script>
 </body>
 </html>
