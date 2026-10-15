@@ -436,7 +436,7 @@
             .linha-tempo .lt-ano b { font-size: 21px; }
         }
 
-        /* ================= Feedback ================= */
+        /* ================= Feedback (abre o formulário em outra aba) ================= */
         .fb-aba {
             position: fixed;
             right: 0;
@@ -449,12 +449,12 @@
             gap: 10px;
             padding: 14px 0;
             width: 40px;
-            border: none;
             border-radius: 10px 0 0 10px;
             background: var(--verde);
             color: #fff;
             font: 600 13px/1 var(--sans);
             letter-spacing: 0.03em;
+            text-decoration: none;
             box-shadow: var(--shadow);
             cursor: pointer;
             transition: background-color .15s, width .15s;
@@ -463,123 +463,22 @@
         .fb-aba:hover { background: var(--verde-escuro); width: 44px; }
         .fb-aba:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; }
         body.com-painel .fb-aba { display: none; }
-
-        #fb-painel, #fb-painel * { box-sizing: border-box; }
-        #fb-painel {
-            position: fixed;
-            z-index: 1400;
-            top: 14px;
-            right: 14px;
-            width: min(400px, calc(100vw - 28px));
-            max-height: calc(100vh - 28px);
-            overflow-y: auto;
-            padding: 20px 20px 18px;
-            background: #fff;
-            color: var(--ink);
-            border: 1px solid var(--hair);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            animation: ic-entrar .2s ease both;
-        }
-        #fb-painel[hidden] { display: none; }
-        .fb-cab { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
-        .fb-cab > div { flex: 1; min-width: 0; }
-        .fb-cab h2 { margin: 0 0 6px; font: 700 20px/1.2 var(--titulo); letter-spacing: -0.01em; }
-        .fb-cab p { margin: 0; font: 400 13.5px/1.5 var(--sans); color: var(--ink-2); }
-        .fb-fechar {
-            flex: none;
-            display: grid;
-            place-items: center;
-            width: 32px;
-            height: 32px;
-            margin: -4px -6px 0 0;
-            border: none;
-            border-radius: 8px;
-            background: transparent;
-            color: var(--ink-2);
-            cursor: pointer;
-        }
-        .fb-fechar:hover { background: var(--hover); color: var(--ink); }
-        .fb-tipos { margin: 0 0 14px; padding: 0; border: none; display: flex; flex-wrap: wrap; gap: 6px; }
-        .fb-tipos legend { padding: 0; margin-bottom: 8px; font: 600 13px/1.2 var(--sans); }
-        .fb-chip { position: relative; cursor: pointer; }
-        .fb-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-        .fb-chip span {
-            display: block;
-            padding: 8px 13px;
-            border: 1px solid var(--hair);
-            border-radius: 999px;
-            background: #fff;
-            font: 600 13px/1 var(--sans);
-            color: var(--ink-2);
-            transition: background-color .15s, border-color .15s, color .15s;
-        }
-        .fb-chip:hover span { border-color: var(--verde); color: var(--verde); }
-        .fb-chip input:checked + span { background: var(--verde); border-color: var(--verde); color: #fff; }
-        .fb-chip input:focus-visible + span { outline: 2px solid var(--verde); outline-offset: 2px; }
-        .fb-campo { display: block; margin-bottom: 12px; }
-        .fb-campo > span { display: block; margin-bottom: 6px; font: 600 13px/1.2 var(--sans); }
-        .fb-campo em { font-style: normal; font-weight: 400; color: var(--ink-2); }
-        .fb-campo textarea, .fb-campo input {
-            display: block;
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--hair);
-            border-radius: 10px;
-            background: #fff;
-            font: 400 14px/1.45 var(--sans);
-            color: var(--ink);
-        }
-        .fb-campo textarea { resize: vertical; min-height: 110px; }
-        .fb-campo textarea:focus, .fb-campo input:focus { outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px var(--verde-suave); }
-        .fb-campo input::placeholder, .fb-campo textarea::placeholder { color: #8b9aa5; }
-        .fb-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .fb-honey { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-        .fb-ctx { display: flex; align-items: flex-start; gap: 9px; margin: 2px 0 14px; font: 400 12.5px/1.45 var(--sans); color: var(--ink-2); cursor: pointer; }
-        .fb-ctx input { flex: none; margin: 2px 0 0; accent-color: var(--verde); width: 16px; height: 16px; }
-        .fb-status { min-height: 0; margin: 0 0 10px; font: 600 13px/1.4 var(--sans); }
-        .fb-status:empty { display: none; }
-        .fb-status.ok { color: var(--verde); }
-        .fb-status.erro { color: #b3261e; }
-        .fb-enviar {
-            width: 100%;
-            height: 44px;
-            border: none;
-            border-radius: 999px;
-            background: var(--verde);
-            color: #fff;
-            font: 600 15px/1 var(--sans);
-            cursor: pointer;
-            transition: background-color .15s;
-        }
-        .fb-enviar:hover:not(:disabled) { background: var(--verde-escuro); }
-        .fb-enviar:disabled { opacity: 0.65; cursor: default; }
-        #fb-painel button:focus-visible { outline: 2px solid var(--verde); outline-offset: 2px; }
+        .fb-aba[hidden], .sb-fb[hidden] { display: none !important; }
         .sb-fb {
             display: none;
             align-items: center;
             gap: 9px;
             width: 100%;
             padding: 12px 0 2px;
-            border: none;
-            background: none;
             font: 600 13px/1.2 var(--sans);
             color: var(--verde);
-            cursor: pointer;
+            text-decoration: none;
         }
         @media (max-width: 760px) {
             .fb-aba { display: none; }
             .sb-fb { display: flex; }
-            #fb-painel {
-                left: 0; right: 0; top: auto; bottom: 0;
-                width: auto;
-                max-height: 90vh;
-                border-radius: 16px 16px 0 0;
-                border-bottom: none;
-            }
-            .fb-duo { grid-template-columns: 1fr; gap: 0; }
         }
-        @media (prefers-reduced-motion: reduce) { #fb-painel, .fb-aba { animation: none; transition: none; } }
+        @media (prefers-reduced-motion: reduce) { .fb-aba { transition: none; } }
 
         /* ================= Texto explicativo da camada ================= */
         #info-camada, #info-camada * { box-sizing: border-box; }
@@ -772,6 +671,7 @@
         input:indeterminate + .trilho { background: #8cc79a; }
         input:indeterminate + .trilho::after { transform: translateX(7px); }
         </style>
+        <script src="config.js"></script>
     </head>
     <body>
         <aside id="sidebar" aria-label="Painel de camadas">
@@ -808,7 +708,7 @@
                 </section>
             </div>
             <footer class="sb-foot">
-                <button type="button" class="sb-fb" id="sb-fb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z"/></svg><span>Enviar comentários</span></button>
+                <a class="sb-fb" id="sb-fb" target="_blank" rel="noopener" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z"/></svg><span>Enviar comentários</span></a>
                 <div class="sb-inst">
                     <img class="sb-logo" src="logo-ifrs-rio-grande.png" width="499" height="778" alt="Instituto Federal Rio Grande do Sul, Campus Rio Grande">
                     <p><strong>Projeto de pesquisa</strong>desenvolvido a partir do TCC de Vitória Mendonça Prestes</p>
@@ -825,42 +725,10 @@
                 </details>
             </footer>
         </aside>
-        <button type="button" class="fb-aba" id="fb-aba" aria-haspopup="dialog" aria-controls="fb-painel">
+        <a class="fb-aba" id="fb-aba" target="_blank" rel="noopener" title="Enviar comentários (abre em nova aba)" aria-label="Enviar comentários (abre em nova aba)" hidden>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z"/></svg>
             <span>Feedback</span>
-        </button>
-        <aside id="fb-painel" role="dialog" aria-labelledby="fb-titulo" hidden>
-            <header class="fb-cab">
-                <div>
-                    <h2 id="fb-titulo">Envie seu comentário</h2>
-                    <p>Sugestões, dúvidas ou erros que encontrar nos dados ajudam a melhorar o atlas.</p>
-                </div>
-                <button type="button" class="fb-fechar" id="fb-fechar" aria-label="Fechar">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
-            </header>
-            <form id="fb-form" novalidate>
-                <fieldset class="fb-tipos">
-                    <legend>Tipo de comentário</legend>
-                    <label class="fb-chip"><input type="radio" name="tipo" value="Sugestão" checked><span>Sugestão</span></label>
-                    <label class="fb-chip"><input type="radio" name="tipo" value="Erro nos dados"><span>Erro nos dados</span></label>
-                    <label class="fb-chip"><input type="radio" name="tipo" value="Dúvida"><span>Dúvida</span></label>
-                    <label class="fb-chip"><input type="radio" name="tipo" value="Outro"><span>Outro</span></label>
-                </fieldset>
-                <label class="fb-campo">
-                    <span>Mensagem</span>
-                    <textarea id="fb-msg" name="mensagem" rows="5" maxlength="2000" required placeholder="Escreva aqui o que você gostaria de nos dizer"></textarea>
-                </label>
-                <div class="fb-duo">
-                    <label class="fb-campo"><span>Nome <em>(opcional)</em></span><input id="fb-nome" type="text" name="name" autocomplete="name" maxlength="120"></label>
-                    <label class="fb-campo"><span>E-mail <em>(opcional)</em></span><input id="fb-email" type="email" name="email" autocomplete="email" maxlength="160" placeholder="para receber resposta"></label>
-                </div>
-                <input type="text" name="_honey" id="fb-honey" class="fb-honey" tabindex="-1" autocomplete="off" aria-hidden="true">
-                <label class="fb-ctx"><input type="checkbox" id="fb-ctx" checked><span>Incluir camadas ativas, posição do mapa e ano da linha do tempo, para ajudar a entender o comentário</span></label>
-                <p class="fb-status" id="fb-status" role="status" aria-live="polite"></p>
-                <button type="submit" class="fb-enviar" id="fb-enviar">Enviar comentário</button>
-            </form>
-        </aside>
+        </a>
         <aside id="info-camada" role="dialog" aria-labelledby="ic-titulo" hidden>
             <header class="ic-cab">
                 <div class="ic-tit">
@@ -2272,7 +2140,6 @@
             document.getElementById('ic-ver').textContent = ligada ? 'Ver no mapa' : 'Ligar e ver no mapa';
         }
         function abrirInfo(c, grupoNome, gatilho) {
-            if (typeof fecharFeedback === 'function') { fecharFeedback(); }
             if (infoAtual && infoAtual.gatilho) {
                 infoAtual.gatilho.classList.remove('ativo');
                 infoAtual.gatilho.setAttribute('aria-expanded', 'false');
@@ -2314,121 +2181,19 @@
 
         sincronizar();
 
-        // ===== Feedback: formulário de comentários =====
-        // Como receber as mensagens (preencha UMA das opções):
-        //  1) Serviço de formulário (recomendado): coloque o endereço de envio em FEEDBACK_ENDPOINT.
-        //       FormSubmit (sem cadastro):  'https://formsubmit.co/ajax/SEU_EMAIL@exemplo.com'
-        //         (no primeiro envio chega um e-mail para você confirmar o endereço)
-        //       Web3Forms: 'https://api.web3forms.com/submit' e FEEDBACK_EXTRAS = { access_key: 'SUA_CHAVE' }
-        //       Formspree: 'https://formspree.io/f/SEU_CODIGO'
-        //  2) Só e-mail: preencha FEEDBACK_EMAIL. O programa de e-mail do visitante abre com a mensagem pronta.
-        var FEEDBACK_ENDPOINT = '';
-        var FEEDBACK_EXTRAS = {};
-        var FEEDBACK_EMAIL = '';
-
-        var fbPainel = document.getElementById('fb-painel');
-        var fbForm = document.getElementById('fb-form');
-        var fbStatus = document.getElementById('fb-status');
-        var fbEnviar = document.getElementById('fb-enviar');
-        var fbAberto = false, fbGatilho = null;
-
+        // ===== Feedback: abre o formulário (link definido em config.js) =====
         function sincronizarAba() {
-            document.body.classList.toggle('com-painel', !!infoAtual || fbAberto);
+            document.body.classList.toggle('com-painel', !!infoAtual);   // a aba some enquanto o painel de texto está aberto
         }
-        function mostrarStatusFb(texto, tipo) {
-            fbStatus.textContent = texto || '';
-            fbStatus.className = 'fb-status' + (tipo ? ' ' + tipo : '');
-        }
-        function abrirFeedback(gatilho) {
-            if (typeof fecharInfo === 'function') { fecharInfo(); }
-            fbGatilho = gatilho || null;
-            fbAberto = true;
-            fbPainel.hidden = false;
-            sincronizarAba();
-            if (ehMovel()) { alternarPainel(false); }
-            mostrarStatusFb('');
-            document.getElementById('fb-msg').focus();
-        }
-        function fecharFeedback() {
-            if (!fbAberto) { return; }
-            fbAberto = false;
-            fbPainel.hidden = true;
-            sincronizarAba();
-            if (fbGatilho && fbGatilho.getClientRects().length) { fbGatilho.focus(); }
-            fbGatilho = null;
-        }
-        document.getElementById('fb-aba').addEventListener('click', function(e) { abrirFeedback(e.currentTarget); });
-        document.getElementById('sb-fb').addEventListener('click', function(e) { abrirFeedback(e.currentTarget); });
-        document.getElementById('fb-fechar').addEventListener('click', fecharFeedback);
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharFeedback(); } });
-
-        // Informações do mapa que ajudam a entender o comentário
-        function contextoDoMapa() {
-            var ligadas = INFO_CAMADAS.filter(function(c) { return map.hasLayer(window['layer_' + c.k]); })
-                .map(function(c) { return c.nome; });
-            var base = BASES.filter(function(b) { return map.hasLayer(b.layer); }).map(function(b) { return b.nome; })[0];
-            var centro = map.getCenter();
-            return {
-                camadas_ativas: ligadas.length ? ligadas.join(', ') : 'nenhuma',
-                mapa_base: base || '',
-                linha_do_tempo: linhaDoTempo.ativa ? ('ano ' + linhaDoTempo.ano) : 'filtro desligado',
-                posicao_do_mapa: 'zoom ' + map.getZoom() + ', centro ' + centro.lat.toFixed(4) + ', ' + centro.lng.toFixed(4),
-                pagina: location.href,
-                tela: window.innerWidth + 'x' + window.innerHeight
-            };
-        }
-
-        function enviarFeedback(dados) {
-            var assunto = 'Atlas interativo: ' + dados.tipo;
-            if (FEEDBACK_ENDPOINT) {
-                var corpo = Object.assign({ subject: assunto, _subject: assunto, _captcha: 'false', _template: 'table' }, FEEDBACK_EXTRAS, dados);
-                return fetch(FEEDBACK_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(corpo)
-                }).then(function(r) {
-                    return r.json().catch(function() { return {}; }).then(function(j) {
-                        if (!r.ok || j.success === false || j.success === 'false' || j.ok === false) { throw new Error('falha no envio'); }
-                    });
-                });
-            }
-            if (FEEDBACK_EMAIL) {
-                var linhas = Object.keys(dados).map(function(k) { return k + ': ' + dados[k]; });
-                window.location.href = 'mailto:' + FEEDBACK_EMAIL + '?subject=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(linhas.join('\n'));
-                return Promise.resolve();
-            }
-            return Promise.reject(new Error('sem destino'));
-        }
-
-        fbForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var msgEl = document.getElementById('fb-msg'), emailEl = document.getElementById('fb-email');
-            var msg = msgEl.value.trim(), email = emailEl.value.trim(), nome = document.getElementById('fb-nome').value.trim();
-            if (!msg) { mostrarStatusFb('Escreva sua mensagem antes de enviar.', 'erro'); msgEl.focus(); return; }
-            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarStatusFb('Confira o e-mail digitado.', 'erro'); emailEl.focus(); return; }
-            var concluir = function() {
-                mostrarStatusFb(FEEDBACK_ENDPOINT || !FEEDBACK_EMAIL ? 'Obrigado! Seu comentário foi enviado.' : 'Abrimos o seu programa de e-mail com a mensagem pronta. Falta só enviá-la.', 'ok');
-                msgEl.value = '';
-            };
-            if (document.getElementById('fb-honey').value) { concluir(); return; }   // robô: finge que enviou
-            var dados = { tipo: fbForm.querySelector('input[name="tipo"]:checked').value, mensagem: msg };
-            if (nome) { dados.name = nome; }
-            if (email) { dados.email = email; }
-            if (document.getElementById('fb-ctx').checked) { Object.assign(dados, contextoDoMapa()); }
-            fbEnviar.disabled = true;
-            fbEnviar.textContent = 'Enviando…';
-            mostrarStatusFb('');
-            enviarFeedback(dados).then(concluir).catch(function(err) {
-                if (window.console) { console.warn('Feedback não enviado:', err); }
-                mostrarStatusFb(err && err.message === 'sem destino'
-                    ? 'O envio de comentários ainda não foi configurado neste atlas.'
-                    : 'Não foi possível enviar agora. Tente de novo em instantes.', 'erro');
-            }).then(function() {
-                fbEnviar.disabled = false;
-                fbEnviar.textContent = 'Enviar comentário';
+        (function() {
+            var url = (typeof FEEDBACK_URL === 'string') ? FEEDBACK_URL.trim() : '';
+            if (!/^https?:\/\//i.test(url)) { return; }                   // sem link válido, a aba fica escondida
+            ['fb-aba', 'sb-fb'].forEach(function(id) {
+                var a = document.getElementById(id);
+                a.href = url;
+                a.hidden = false;
             });
-        });
-        if (/[?&]feedback=1/.test(location.search)) { abrirFeedback(); }
+        })();
 
         // ===== Escala e coordenadas do cursor =====
         L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 140 }).addTo(map);
