@@ -328,6 +328,15 @@
         .sw b { box-shadow: inset 0 0 0 1px var(--b, transparent); }
         .sw.icone { background: #e9eef1; }
         .sw.icone img { position: absolute; top: 1px; left: 50%; width: 12px; height: 12px; margin-left: -6px; }
+        .item .nome .per { display: block; margin-top: 1px; font: 500 11.5px/1.3 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+        .ic-periodo { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--hair); font: 400 13px/1.5 var(--sans); color: #24343f; }
+        .ic-periodo > strong { display: block; margin-bottom: 8px; font-weight: 700; }
+        .ic-bloco { margin-bottom: 12px; }
+        .ic-bloco span { display: block; }
+        .ic-bloco .ic-anos { margin-bottom: 3px; font: 700 15px/1.3 var(--sans); color: var(--verde); }
+        .ic-bloco .ic-ref { margin-top: 5px; font-size: 12.5px; color: var(--ink-2); }
+        .ic-bloco .ic-ref em { font-style: normal; font-weight: 600; color: var(--ink); }
+        .ic-periodo + .ic-fonte { margin-top: 0; }
         .ic-fonte { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--hair); font: 400 12.5px/1.5 var(--sans); color: var(--ink-2); }
         .ic-fonte span { display: block; margin-bottom: 8px; }
         .ic-fonte strong { display: block; font-weight: 700; color: var(--ink); }
@@ -488,7 +497,7 @@
             top: 14px;
             right: 14px;
             width: min(410px, calc(100vw - var(--sbw) - 28px));
-            max-height: calc(100vh - 120px);
+            max-height: max(300px, calc(100vh - 205px));   /* deixa a linha do tempo livre embaixo */
             display: flex;
             flex-direction: column;
             background: #fff;
@@ -1820,7 +1829,7 @@
             var ano = linhaDoTempo.ativa ? linhaDoTempo.ano : null;
             function passaAno(e) {
                 if (ano === null || !e) { return true; }     // sem período de existência: continua visível
-                return e[0] <= ano && ano <= e[1];
+                return e.some(function(iv) { return iv[0] <= ano && ano <= iv[1]; });
             }
             itens.forEach(function(it) {
                 var l = window['layer_' + it.c.k];
@@ -1839,20 +1848,73 @@
         }
 
         // ===== Linha do tempo: de 1500 até hoje =====
-        // Mostra só o que existia no ano escolhido. O período de existência vem, em ordem, de:
-        //   1) campos INICIO e FIM de cada feição (na tabela de atributos do QGIS), ou
-        //   2) da tabela abaixo, por camada (use null no fim para "até hoje").
-        // Sem nenhum dos dois, a camada fica sempre visível.
-        var PERIODOS_CAMADAS = {
-            // 'FUMO_2': [1800, 1899],
-            // 'TORDESILHAS_26': [1494, 1750],
-            // 'ALEMES_15': [1824, null]
+        // Período de existência de cada camada. É o que a linha do tempo usa para mostrar ou esconder a camada,
+        // e também aparece no texto explicativo (botão "i"). Cada camada tem uma ou mais datações:
+        //   { ini, fim, fonte, justificativa }   (fim: null = até hoje; rotulo é opcional)
+        // Se as feições tiverem os campos INICIO e FIM (tabela de atributos do QGIS), eles valem no lugar desta tabela.
+        // Camada sem período aqui nem nos campos fica sempre visível.
+        var DATACAO_CAMADAS = {
+            'PAUBRASIL_3': [
+                { ini: 1500,
+                  fim: 1530,
+                  fonte: "BUENO, Eduardo. Pau-Brasil. São Paulo: Sextante, 2002.",
+                  justificativa: "Inicia com a chegada dos portugueses em 1500 e encerra seu período exclusivo em 1530 com a expedição de Martim Afonso de Sousa e o início da colonização efetiva por meio das Capitanias Hereditárias." }
+            ],
+            'CANADEAUCAR_4': [
+                { ini: 1530,
+                  fim: 1700,
+                  fonte: "FERLINI, Vera Lucia Amaral. Terra, Trabalho e Poder: O Mundo dos Engenhos no Nordeste Colonial. São Paulo: Brasiliense, 1988.",
+                  justificativa: "Começa em 1530 com a introdução das primeiras mudas de cana em São Vicente e Pernambuco, tendo seu apogeu até o final do século XVII (1700), quando a concorrência do açúcar holandês nas Antilhas e a descoberta de ouro nas Minas Gerais deslocaram o eixo econômico." }
+            ],
+            'FUMO_2': [
+                { ini: 1650,
+                  fim: 1850,
+                  fonte: "VERGER, Pierre. Fluxo e Refluxo do Tráfico de Escravos entre o Golfo do Benin e a Bahia de Todos os Santos. São Paulo: Corrupio, 1987.",
+                  justificativa: "Consolida-se a partir de meados do século XVII (1650) com a expansão do Recôncavo Baiano como moeda de troca no tráfico transatlântico de escravizados, perdendo sua força central com a proibição do tráfico negreiro (Lei Eusébio de Queirós em 1850)." }
+            ],
+            'PECUARIA_8': [
+                { ini: 1600,
+                  fim: 1900,
+                  fonte: "CAPISTRANO DE ABREU, João. Capítulos de História Colonial (1500-1800). Brasília: Conselho Editorial do Senado Federal, 1998.",
+                  justificativa: "Inicia no século XVII (1600) com a penetração pelo Vale do Rio São Francisco (“Rio dos Currais”) para abastecer os engenhos e atinge a consolidação dos pampas gaúchos no século XIX, perdendo espaço como ciclo isolado ao longo da industrialização no início do século XX." }
+            ],
+            'DROGASDOSERTOEBORRACHA_6': [
+                { rotulo: "Drogas do Sertão",
+                  ini: 1600,
+                  fim: 1750,
+                  fonte: "MORAES, Antonio Carlos Robert. Bases da Formação Territorial do Brasil: O Território Colonial em Construção. São Paulo: Hucitec, 2000.",
+                  justificativa: "Inicia no século XVII com a atuação das missões religiosas e das expedições pela Bacia Amazônica, declinando por volta de 1750 com as reformas pombalinas e a expulsão dos jesuítas da região." },
+                { rotulo: "Borracha",
+                  ini: 1870,
+                  fim: 1912,
+                  fonte: "BENCHIMOL, Samuel. Amazônia: Formação Social e Econômica. Manaus: Editora Valer, 1999.",
+                  justificativa: "Começa a expansão na década de 1870 com o boom da indústria automobilística mundial e entra em colapso acentuado por volta de 1912 com o início do cultivo da seringueira concorrente na Ásia pelos britânicos." }
+            ],
+            'ALGODO_9': [
+                { ini: 1760,
+                  fim: 1880,
+                  fonte: "PALACIN, Luís. O Século do Ouro em Goiás e a Expansão Algodoeira no Maranhão. Goiânia: Editora UFG, 1994.",
+                  justificativa: "Ganha força na década de 1760 com a criação da Companhia Geral de Comércio do Grão-Pará e Maranhão e o aumento da demanda durante a Revolução Industrial e a Guerra de Secessão Americana, perdendo fôlego no final do século XIX com a recuperação da produção dos EUA." }
+            ],
+            'MATE_7': [
+                { ini: 1850,
+                  fim: 1930,
+                  fonte: "LINHARES, Temístocles. História Econômica do Mate. Rio de Janeiro: José Olympio, 1969.",
+                  justificativa: "Impulsiona a economia do Sul (Paraná e Santa Catarina) a partir de 1850 com o aumento das exportações para os países do Prata (Argentina e Uruguai), durando até a crise dos anos 1930 e a implementação de barreiras alfandegárias argentinas." }
+            ],
+            'CAF_5': [
+                { ini: 1830,
+                  fim: 1930,
+                  fonte: "CANABRAVA, Alice Piffer. O Desenvolvimento da Cultura do Café no Brasil. São Paulo: FEA/USP, 1981.",
+                  justificativa: "Torna-se o principal produto de exportação brasileiro a partir da década de 1830 (expansão pelo Vale do Paraíba e Oeste Paulista) e tem seu ciclo clássico encerrado com a Crise de 1929 e a Revolução de 1930." }
+            ]
         };
 
         var ANO_MIN = 1500, ANO_MAX = new Date().getFullYear();
         var linhaDoTempo = { ativa: false, ano: ANO_MIN };
         var camadasSemExistencia = [], comExistencia = 0;
 
+        // Devolve a lista de intervalos [início, fim] em que a feição existe, ou null se não há período
         function lerExistencia(props, k) {
             var achados = {};
             Object.keys(props || {}).forEach(function(n) { achados[semAcento(n).toUpperCase()] = props[n]; });
@@ -1868,16 +1930,15 @@
             var ini = null, fim = null;
             if (vi !== null) { var pi = lerPeriodo(vi); if (pi) { ini = pi[0]; } }
             if (vf !== null) { var pf = lerPeriodo(vf); if (pf) { fim = pf[1]; } }
-            if (ini === null && fim === null) {
-                var t = PERIODOS_CAMADAS[k];
-                if (!t) { return null; }
-                ini = (t[0] === null || t[0] === undefined) ? null : t[0];
-                fim = (t[1] === null || t[1] === undefined) ? null : t[1];
-                if (ini === null && fim === null) { return null; }
+            function intervalo(a, b) {
+                a = (a === null || a === undefined) ? -Infinity : a;
+                b = (b === null || b === undefined) ? Infinity : b;   // sem fim: continua até hoje
+                return a <= b ? [a, b] : [b, a];
             }
-            if (ini === null) { ini = -Infinity; }
-            if (fim === null) { fim = Infinity; }      // sem fim: continua até hoje
-            return ini <= fim ? [ini, fim] : [fim, ini];
+            if (ini !== null || fim !== null) { return [intervalo(ini, fim)]; }
+            var lista = DATACAO_CAMADAS[k];
+            if (!lista || !lista.length) { return null; }
+            return lista.map(function(d) { return intervalo(d.ini, d.fim); });
         }
         function lerExistenciaTodas() {
             comExistencia = 0;
@@ -1894,6 +1955,30 @@
             });
         }
         lerExistenciaTodas();
+
+        // Texto do período: "1530–1700" (curto) ou "1530 a 1700" (por extenso)
+        function textoIntervalo(ini, fim, extenso) {
+            var semIni = (ini === null || ini === undefined), semFim = (fim === null || fim === undefined);
+            if (semIni && semFim) { return ''; }
+            if (semFim) { return ini + (extenso ? ' até hoje' : '–hoje'); }
+            if (semIni) { return 'até ' + fim; }
+            return ini + (extenso ? ' a ' : '–') + fim;
+        }
+        // Mostra o período abaixo do nome de cada camada na barra lateral
+        function rotularPeriodosNaLista() {
+            itens.forEach(function(it) {
+                var nome = it.li.querySelector('.nome');
+                var velho = nome.querySelector('.per');
+                if (velho) { nome.removeChild(velho); }
+                var lista = DATACAO_CAMADAS[it.c.k];
+                if (!lista || !lista.length) { return; }
+                var s = document.createElement('span');
+                s.className = 'per';
+                s.textContent = lista.map(function(d) { return textoIntervalo(d.ini, d.fim); }).join(' e ');
+                nome.appendChild(s);
+            });
+        }
+        rotularPeriodosNaLista();
 
         var ltEl = L.DomUtil.create('div', 'linha-tempo', map.getContainer());
         ltEl.id = 'linha-tempo';
@@ -2113,9 +2198,21 @@
         };
 
         function escaparHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function periodoHtml(c) {
+            var lista = DATACAO_CAMADAS[c.k];
+            if (!lista || !lista.length) { return ''; }
+            var blocos = lista.map(function(d) {
+                var cab = (d.rotulo ? escaparHtml(d.rotulo) + ': ' : '') + escaparHtml(textoIntervalo(d.ini, d.fim, true));
+                var html = '<span class="ic-anos">' + cab + '</span>';
+                if (d.justificativa) { html += '<span>' + escaparHtml(d.justificativa) + '</span>'; }
+                if (d.fonte) { html += '<span class="ic-ref"><em>Fonte da datação:</em> ' + autolinker.link(escaparHtml(d.fonte)) + '</span>'; }
+                return '<div class="ic-bloco">' + html + '</div>';
+            });
+            return '<div class="ic-periodo"><strong>Período de existência</strong>' + blocos.join('') + '</div>';
+        }
         function fontesHtml(c) {
             var l = window['layer_' + c.k];
-            var rotulos = { 'FONTE': 'Fonte', 'FONTE MAPA': 'Fonte do mapa', 'FONTE INFO': 'Fonte das informações' };
+            var rotulos = { 'FONTE': 'Fonte do mapa', 'FONTE MAPA': 'Fonte do mapa', 'FONTE INFO': 'Fonte das informações' };
             var vistos = {}, partes = [];
             ((l && l._todas) || []).forEach(function(sub) {
                 var p = (sub.feature && sub.feature.properties) || {};
@@ -2148,7 +2245,7 @@
             document.getElementById('ic-grupo').innerHTML = amostra(c) + '<span>' + grupoNome + '</span>';
             document.getElementById('ic-titulo').textContent = c.nome;
             var paragrafos = TEXTOS_CAMADAS[c.k] || ['O texto explicativo desta camada ainda não foi cadastrado.'];
-            document.getElementById('ic-corpo').innerHTML = paragrafos.map(function(t) { return '<p>' + t + '</p>'; }).join('') + fontesHtml(c);
+            document.getElementById('ic-corpo').innerHTML = paragrafos.map(function(t) { return '<p>' + t + '</p>'; }).join('') + periodoHtml(c) + fontesHtml(c);
             if (gatilho) { gatilho.classList.add('ativo'); gatilho.setAttribute('aria-expanded', 'true'); }
             infoEl.hidden = false;
             sincronizarAba();
