@@ -143,7 +143,10 @@
             height: 100%;
             object-fit: cover;
             object-position: 45% 50%;
+            opacity: 0;
+            transition: opacity 1.2s ease;
         }
+        .foto img.ativa { opacity: 1; }
         .foto::after {
             content: '';
             position: absolute;
@@ -155,11 +158,16 @@
             position: absolute;
             left: 24px;
             bottom: 18px;
-            z-index: 1;
+            z-index: 2;
+            max-width: calc(100% - 48px);
             color: #fff;
             font: 600 13px/1.2 var(--sans);
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            transition: opacity .25s ease;
         }
+        .foto figcaption.troca { opacity: 0; }
+        #gal-credito { display: block; margin-top: 4px; font-weight: 500; font-size: 11.5px; opacity: 0.9; }
+        #gal-credito:empty { display: none; }
 
         /* ---------- Temas ---------- */
         .temas {
@@ -210,6 +218,7 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .meridiano { animation: none; }
+            .foto img, .foto figcaption { transition: none; }
             .cta { transition: none; }
         }
     </style>
@@ -240,9 +249,11 @@
             </main>
         </div>
 
-        <figure class="foto">
-            <img src="ouro-preto.jpg" width="1800" height="990" alt="Vista de Ouro Preto, em Minas Gerais, com igrejas e casarios coloniais nas encostas das montanhas">
-            <figcaption>Ouro Preto, Minas Gerais</figcaption>
+        <figure class="foto" id="galeria" role="group" aria-label="Fotos de cidades brasileiras">
+            <div id="slides">
+                <img class="ativa" src="ouro-preto.jpg" width="1800" height="990" alt="Vista de Ouro Preto, em Minas Gerais, com igrejas e casarios coloniais nas encostas das montanhas">
+            </div>
+            <figcaption id="gal-legenda"><span id="gal-local">Ouro Preto, Minas Gerais</span><span id="gal-credito"></span></figcaption>
         </figure>
     </div>
 
@@ -282,6 +293,85 @@
             var a = document.getElementById('link-feedback');
             a.href = url;
             a.hidden = false;
+        })();
+    </script>
+    <script>
+        // Fotos que se alternam na página inicial. Para trocar, acrescentar ou tirar uma foto, edite esta lista.
+        // Use "credito" para informar o autor da foto (aparece como "Foto: ..." sob o nome do lugar).
+        (function () {
+            var FOTOS = [
+                { src: 'ouro-preto.jpg', local: 'Ouro Preto, Minas Gerais', credito: '', pos: '45% 50%',
+                  alt: 'Vista de Ouro Preto, em Minas Gerais, com igrejas e casarios coloniais nas encostas das montanhas' },
+                { src: 'salvador.jpg', local: 'Pelourinho, Salvador, Bahia', credito: '', pos: '55% 50%',
+                  alt: 'Casarios coloniais coloridos e igreja no Pelourinho, em Salvador, na Bahia' },
+                { src: 'olinda-recife.jpg', local: 'Olinda e Recife, Pernambuco', credito: '', pos: '35% 50%',
+                  alt: 'Casarios coloniais e igrejas de Olinda, com o mar e os prédios do Recife ao fundo' },
+                { src: 'rio-de-janeiro.jpg', local: 'Rio de Janeiro, Rio de Janeiro', credito: '', pos: '50% 50%',
+                  alt: 'Vista aérea do Rio de Janeiro com o Cristo Redentor, a Baía de Guanabara e o Pão de Açúcar' },
+                { src: 'sao-paulo-torre.jpg', local: 'São Paulo, São Paulo', credito: '', pos: '60% 50%',
+                  alt: 'Torre com relógio de um edifício histórico de São Paulo e estátua de bronze em primeiro plano' },
+                { src: 'sao-paulo-centro.jpg', local: 'Centro de São Paulo, São Paulo', credito: '', pos: '48% 50%',
+                  alt: 'Rua do centro de São Paulo, com prédios históricos e um arranha-céu ao fundo' },
+                { src: 'manaus.jpg', local: 'Praça de São Sebastião, Manaus, Amazonas', credito: '', pos: '25% 50%',
+                  alt: 'Praça de São Sebastião, em Manaus, com a igreja e casarões históricos' }
+            ];
+            var INTERVALO = 6500;                                   // tempo de cada foto, em milissegundos
+            var area = document.getElementById('slides');
+            var legenda = document.getElementById('gal-legenda');
+            var local = document.getElementById('gal-local');
+            var credito = document.getElementById('gal-credito');
+            var fig = document.getElementById('galeria');
+            var reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;   // quem pede menos movimento fica com a primeira foto
+            var imgs = [area.querySelector('img')];
+            var atual = 0, timer = null, sobFoto = false;
+            imgs[0].setAttribute('aria-hidden', 'false');
+
+            function carregada(im) { return im && im.complete && im.naturalWidth > 0; }
+            function proxima() {
+                for (var k = 1; k < FOTOS.length; k++) {
+                    var j = (atual + k) % FOTOS.length;
+                    if (!carregada(imgs[j])) { continue; }
+                    imgs[atual].classList.remove('ativa');
+                    imgs[atual].setAttribute('aria-hidden', 'true');
+                    imgs[j].classList.add('ativa');
+                    imgs[j].setAttribute('aria-hidden', 'false');
+                    atual = j;
+                    legenda.classList.add('troca');
+                    setTimeout(function () {
+                        local.textContent = FOTOS[atual].local;
+                        credito.textContent = FOTOS[atual].credito ? 'Foto: ' + FOTOS[atual].credito : '';
+                        legenda.classList.remove('troca');
+                    }, 250);
+                    return;
+                }
+            }
+            function atualizarTimer() {
+                clearInterval(timer);
+                timer = null;
+                if (!reduz && !sobFoto && !document.hidden && imgs.length > 1) { timer = setInterval(proxima, INTERVALO); }
+            }
+            // A troca para enquanto o mouse está sobre a foto e quando a aba do navegador fica em segundo plano
+            fig.addEventListener('mouseenter', function () { sobFoto = true; atualizarTimer(); });
+            fig.addEventListener('mouseleave', function () { sobFoto = false; atualizarTimer(); });
+            document.addEventListener('visibilitychange', atualizarTimer);
+
+            // As outras fotos só são baixadas depois que a página terminou de carregar
+            function carregarRestantes() {
+                FOTOS.forEach(function (f, i) {
+                    if (i === 0) { return; }
+                    var im = new Image();
+                    im.className = 'slide';
+                    im.alt = f.alt;
+                    im.decoding = 'async';
+                    im.style.objectPosition = f.pos;
+                    im.setAttribute('aria-hidden', 'true');
+                    im.src = f.src;
+                    area.appendChild(im);
+                    imgs[i] = im;
+                });
+                atualizarTimer();
+            }
+            if (document.readyState === 'complete') { carregarRestantes(); } else { window.addEventListener('load', carregarRestantes); }
         })();
     </script>
 </body>
