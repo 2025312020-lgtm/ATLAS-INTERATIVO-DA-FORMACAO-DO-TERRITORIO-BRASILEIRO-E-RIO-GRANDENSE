@@ -92,7 +92,6 @@
         .apoio div { display: flex; align-items: center; gap: 24px; }
         .apoio img { display: block; width: auto; }
         .apoio .cnpq { height: clamp(34px, 5vh, 44px); }
-        .apoio .fapergs { height: clamp(40px, 6vh, 54px); }
         .logo { display: block; width: auto; height: clamp(88px, 13vh, 120px); }
 
         main {
@@ -170,16 +169,18 @@
         #gal-credito:empty { display: none; }
 
         /* ---------- Temas ---------- */
-        .temas {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            margin: 0 clamp(24px, 7vw, 112px);
+        .sobre {
+            padding: clamp(36px, 6vh, 64px) clamp(24px, 7vw, 112px) clamp(20px, 3vh, 36px);
             border-top: 1px solid var(--hair);
         }
-        .temas div { padding: 22px 24px 24px 0; }
-        .temas div + div { padding-left: 24px; border-left: 1px solid var(--hair); }
-        .temas h2 { margin: 0 0 6px; font: 700 14.5px/1.3 var(--sans); }
-        .temas p { margin: 0; font: 400 13.5px/1.55 var(--sans); color: var(--ink-2); }
+        .sobre h2 { margin: 0 0 24px; font: 700 clamp(1.3rem, 2.2vw, 1.7rem)/1.2 var(--titulo); letter-spacing: -0.01em; }
+        .sobre-texto {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 clamp(32px, 5vw, 72px);
+            max-width: 1180px;
+        }
+        .sobre-texto p { margin: 0 0 1.1em; max-width: 64ch; font: 400 15.5px/1.7 var(--sans); color: #2b3c48; }
 
         footer {
             display: flex;
@@ -198,22 +199,16 @@
         footer .links { display: flex; flex-wrap: wrap; gap: 6px 24px; }
 
         @media (max-width: 900px) {
+            .sobre-texto { grid-template-columns: 1fr; }
             .hero { grid-template-columns: 1fr; }
             .meridiano { display: none; }
             main { padding-right: clamp(24px, 7vw, 112px); }
             .foto { min-height: 0; height: clamp(220px, 50vw, 380px); }
-            .temas { grid-template-columns: 1fr 1fr; }
-            .temas div:nth-child(3) { padding-left: 0; border-left: none; }
-            .temas div:nth-child(n+3) { border-top: 1px solid var(--hair); }
         }
         @media (max-width: 560px) {
             .apoio { padding-left: 16px; }
             .apoio div { gap: 16px; }
             .apoio .cnpq { height: 30px; }
-            .apoio .fapergs { height: 36px; }
-            .temas { grid-template-columns: 1fr; }
-            .temas div, .temas div + div { padding: 16px 0; border-left: none; }
-            .temas div + div { border-top: 1px solid var(--hair); }
             .cta { width: 100%; justify-content: center; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -236,7 +231,6 @@
                     <p>Apoio</p>
                     <div>
                         <img class="cnpq" src="logo-cnpq.png" width="455" height="140" alt="CNPq, Conselho Nacional de Desenvolvimento Científico e Tecnológico">
-                        <img class="fapergs" src="logo-fapergs.png" width="368" height="200" alt="FAPERGS, Fundação de Amparo à Pesquisa do Estado do Rio Grande do Sul">
                     </div>
                 </div>
             </header>
@@ -257,29 +251,24 @@
         </figure>
     </div>
 
-    <section class="temas" aria-label="Temas do atlas">
-        <div>
-            <h2>Ciclos econômicos</h2>
-            <p>Fumo, pau-brasil, cana de açúcar, café, drogas do sertão e borracha, mate, pecuária e algodão.</p>
-        </div>
-        <div>
-            <h2>Caminhos</h2>
-            <p>Caminho das Missões, da Vacaria dos Pinhais, da Praia, caminhos das tropas e rotas alternativas.</p>
-        </div>
-        <div>
-            <h2>Imigração e colonização</h2>
-            <p>Alemães, italianos, açorianos e outras etnias, com as zonas de mata e de colonização.</p>
-        </div>
-        <div>
-            <h2>Reduções e linhas históricas</h2>
-            <p>As reduções, os rumos de penetração dos bandeirantes e a linha de Tordesilhas.</p>
+    <section class="sobre" aria-labelledby="sobre-titulo">
+        <h2 id="sobre-titulo">Sobre o projeto</h2>
+        <div class="sobre-texto">
+            <div>
+                <p>A representação cartográfica evoluiu para uma linguagem visual autônoma, fundamental na interpretação das dinâmicas socioeconômicas e territoriais. Todavia, enquanto o campo técnico-científico opera com geotecnologias, o ensino de Geografia permanece dependente de suportes analógicos. Para aproximar essas realidades, desenvolveu-se uma plataforma em ambiente WebSIG para o ensino da formação territorial do Brasil e do Rio Grande do Sul, visando a alfabetização cartográfica na Educação Básica.</p>
+                <p>A metodologia abrange o georreferenciamento de mapas históricos, vetorização e associação de atributos, aplicando padrões de hachuras e cores de alto contraste para garantir a acessibilidade a partir do Desenho Universal para a Aprendizagem (DUA). Na web, viabiliza-se a transposição didática por uma interface interativa e multiescalar.</p>
+            </div>
+            <div>
+                <p>Como resultado, o protótipo atua parcialmente operacional e publicado, permitindo sobrepor camadas, consultar pop-ups e utilizar padrões acessíveis. O projeto enfrentou desafios metodológicos no georreferenciamento e vetorização de mapas históricos heterogêneos.</p>
+                <p>Como passos futuros, pretende-se concluir as camadas temporais pendentes, realizar testes de usabilidade com professores e estudantes, e elaborar um guia com orientações didáticas. Conclui-se que o WebSIG contribui para o ensino de Geografia ao substituir a observação passiva de mapas pela construção ativa e dinâmica do conhecimento, promovendo o protagonismo dos estudantes.</p>
+            </div>
         </div>
     </section>
 
     <footer>
         <div class="creditos">
             <p><strong>Projeto de pesquisa</strong> desenvolvido a partir do TCC de Vitória Mendonça Prestes.</p>
-            <p>Coordenação: Jefferson Rodrigues dos Santos. Bolsista: Murilo Dias dos Santos.</p>
+            <p>Coordenação: Jefferson Rodrigues dos Santos. Bolsistas: Murilo Dias dos Santos e Veridiana Feijó da Rosa.</p>
         </div>
         <div class="links">
             <a href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf" target="_blank" rel="noopener">Ler o TCC (PDF)</a>
