@@ -2319,5 +2319,383 @@
 
         setBounds();
         </script>
+        <script>
+/*
+ * Exportação do mapa em PDF (com título, escala gráfica e numérica, seta norte e legenda).
+ *
+ * Módulo de exportação, incluído diretamente no mapa.html.
+ *
+ * Funcionamento: o botão "Exportar mapa em PDF" (rodapé do painel lateral) abre uma prévia da folha.
+ * O mapa passa para dentro da folha, o usuário enquadra a área desejada e clica em "Gerar PDF".
+ * O navegador abre o diálogo de impressão, onde se escolhe "Salvar como PDF".
+ * Este script usa as variáveis do mapa.html: map, INFO_CAMADAS, GRUPOS, BASES, amostra,
+ * textoIntervalo, DATACAO_CAMADAS, itens, linhaDoTempo, fecharInfo, pararReproducao, alternarPainel.
+ */
+(function () {
+    'use strict';
+    if (typeof map === 'undefined' || typeof L === 'undefined' || typeof INFO_CAMADAS === 'undefined') { return; }
+
+    var TITULO_PADRAO = 'Formação do território brasileiro';
+    var PAPEIS = { A4: [297, 210], A3: [420, 297] };   // paisagem, em mm
+    var cfg = { papel: 'A4', orient: 'paisagem', titulo: TITULO_PADRAO };
+    var ativo = false, paiOriginal = null, irmaoOriginal = null;
+    var mapEl = map.getContainer();
+
+    // ---------- Estilos ----------
+    var css = `
+    .pdf-ctl { display: none; }
+    body.modo-pdf .pdf-ctl { display: block; }
+    body.modo-pdf .leaflet-control:not(.pdf-ctl):not(.leaflet-control-attribution) { display: none !important; }
+    body.modo-pdf .linha-tempo { display: none !important; }
+
+    #pdf-tela, #pdf-tela * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #pdf-tela {
+        display: none; position: fixed; inset: 0; z-index: 5000; flex-direction: column;
+        background: #2f3b45; color: #10222f; font-family: var(--sans, system-ui, sans-serif);
+    }
+    body.modo-pdf #pdf-tela { display: flex; }
+    body.modo-pdf { overflow: hidden; }
+
+    .pdf-barra {
+        flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 16px;
+        background: #fff; border-bottom: 1px solid var(--hair, #e3e9ed); box-shadow: 0 2px 10px rgba(5, 18, 30, 0.2);
+    }
+    .pdf-barra label { display: flex; align-items: center; gap: 8px; font: 600 12.5px/1 var(--sans, sans-serif); color: var(--ink-2, #566774); }
+    .pdf-barra input[type=text], .pdf-barra select {
+        height: 36px; padding: 0 10px; border: 1px solid var(--hair, #e3e9ed); border-radius: 8px; background: #fff;
+        font: 500 13.5px/1 var(--sans, sans-serif); color: var(--ink, #10222f);
+    }
+    .pdf-barra input[type=text] { width: min(330px, 45vw); }
+    .pdf-barra input:focus-visible, .pdf-barra select:focus-visible { outline: 2px solid var(--verde, #278036); outline-offset: 1px; }
+    .pdf-esp { flex: 1; }
+    .pdf-btn {
+        height: 40px; padding: 0 22px; border: 1px solid var(--verde, #278036); border-radius: 999px;
+        background: var(--verde, #278036); color: #fff; font: 600 14px/1 var(--sans, sans-serif); cursor: pointer;
+    }
+    .pdf-btn:hover { background: var(--verde-escuro, #1d6a2b); }
+    .pdf-btn.sec { background: #fff; color: var(--ink, #10222f); border-color: var(--hair, #c9d3d9); }
+    .pdf-btn.sec:hover { background: var(--hover, #f3f7f9); }
+    .pdf-btn:focus-visible { outline: 3px solid var(--ink, #10222f); outline-offset: 2px; }
+    .pdf-dica { flex-basis: 100%; margin: 0; font: 400 12.5px/1.45 var(--sans, sans-serif); color: var(--ink-2, #566774); }
+
+    .pdf-area { flex: 1; min-height: 0; overflow: auto; padding: 24px; }
+
+    .folha {
+        position: relative; display: flex; flex-direction: column; gap: 3mm; margin: 0 auto; padding: 8mm;
+        width: var(--fw); height: var(--fh); overflow: hidden; background: #fff; color: #10222f;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45); break-inside: avoid; page-break-after: avoid;
+    }
+    .fp-cab { flex: none; display: flex; align-items: center; gap: 4mm; padding-bottom: 3mm; border-bottom: 0.4mm solid #10222f; }
+    .fp-cab img { display: block; height: 14mm; width: auto; }
+    .fp-cab h1 { margin: 0; font: 700 17pt/1.15 Arial, 'Helvetica Neue', Helvetica, sans-serif; letter-spacing: -0.01em; }
+    .fp-cab p { margin: 1mm 0 0; font: 500 9pt/1.25 var(--sans, sans-serif); color: #4f616d; }
+
+    .fp-corpo { flex: 1; min-height: 0; display: flex; gap: 4mm; }
+    .folha.retrato .fp-corpo { flex-direction: column; }
+    .fp-mapa { position: relative; flex: 1; min-width: 0; min-height: 0; border: 0.3mm solid #10222f; background: #d6dde1; overflow: hidden; }
+    .fp-mapa #map { position: absolute !important; left: 0; top: 0; width: 100% !important; height: 100% !important; flex: none; }
+
+    .fp-leg { flex: none; display: flex; flex-direction: column; width: 64mm; min-height: 0; padding: 3mm; border: 0.3mm solid #10222f; overflow: hidden; }
+    .folha.retrato .fp-leg { width: auto; max-height: 72mm; }
+    .fp-leg h2 { flex: none; margin: 0 0 2mm; padding-bottom: 1.5mm; border-bottom: 0.25mm solid #c3cdd4; font: 700 11pt/1.2 Arial, Helvetica, sans-serif; }
+    .fp-leg-corpo { flex: 1; min-height: 0; overflow: hidden; font-size: 8.5pt; }
+    .folha.retrato .fp-leg-corpo { column-count: 3; column-gap: 5mm; }
+    .fp-grp { break-inside: avoid; margin-bottom: 2.5mm; }
+    .fp-grp h3 { margin: 0 0 0.8mm; font: 700 0.95em/1.2 var(--sans, sans-serif); color: #278036; text-transform: uppercase; letter-spacing: 0.03em; }
+    .fp-grp ul { margin: 0; padding: 0; list-style: none; }
+    .fp-grp li { display: flex; align-items: flex-start; gap: 2mm; padding: 0.7mm 0; font: 500 1em/1.25 var(--sans, sans-serif); }
+    .fp-grp li .sw { margin-top: 0.2mm; }
+    .fp-grp .per { display: block; font-size: 0.88em; color: #4f616d; font-variant-numeric: tabular-nums; }
+    .fp-leg .vazio { margin: 0; font: 400 1em/1.4 var(--sans, sans-serif); color: #4f616d; }
+
+    .fp-rod { flex: none; display: flex; justify-content: space-between; gap: 6mm; padding-top: 2mm; border-top: 0.3mm solid #c3cdd4; font: 400 7pt/1.35 var(--sans, sans-serif); color: #4f616d; }
+    .fp-rod span:last-child { text-align: right; }
+
+    /* Seta norte e escala, desenhadas sobre o mapa */
+    .pdf-norte, .pdf-escala {
+        background: rgba(255, 255, 255, 0.93); border: 0.3mm solid #10222f; border-radius: 2mm; color: #10222f;
+        font: 600 8pt/1.2 Arial, Helvetica, sans-serif; pointer-events: none;
+    }
+    .pdf-norte { padding: 1.5mm 2mm 1mm; line-height: 0; }
+    .pdf-escala { padding: 2mm 7mm 1.5mm 3mm; }
+    .pdf-escala .pe-num { margin-bottom: 1.6mm; white-space: nowrap; }
+    .pdf-escala .pe-barra { display: flex; height: 2.2mm; border: 0.25mm solid #10222f; }
+    .pdf-escala .pe-barra i { flex: 1; background: #10222f; }
+    .pdf-escala .pe-barra i:nth-child(even) { background: #fff; }
+    .pdf-escala .pe-rot { position: relative; height: 3.6mm; margin-top: 0.6mm; font-size: 7.5pt; }
+    .pdf-escala .pe-rot span { position: absolute; top: 0; white-space: nowrap; transform: translateX(-50%); }
+
+    /* Botão no painel lateral */
+    .sb-export {
+        display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 42px; margin: 14px 0 0;
+        border: 1.5px solid var(--verde, #278036); border-radius: 999px; background: #fff; color: var(--verde, #278036);
+        font: 600 13.5px/1 var(--sans, sans-serif); cursor: pointer; transition: background-color .15s, color .15s;
+    }
+    .sb-export:hover { background: var(--verde, #278036); color: #fff; }
+
+    @media print {
+        html { height: auto !important; }
+        body.modo-pdf { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
+        body.modo-pdf > *:not(#pdf-tela) { display: none !important; }
+        body.modo-pdf #pdf-tela { position: absolute !important; inset: auto !important; left: 0; top: 0; display: block; width: auto; height: auto; background: none; }
+        body.modo-pdf .pdf-barra { display: none !important; }
+        body.modo-pdf .pdf-area { padding: 0; overflow: visible; }
+        body.modo-pdf .folha { margin: 0; box-shadow: none; }
+    }
+    `;
+    var estilo = document.createElement('style');
+    estilo.textContent = css;
+    document.head.appendChild(estilo);
+    var estiloPagina = document.createElement('style');   // @page só vale enquanto a prévia está aberta
+    document.head.appendChild(estiloPagina);
+
+    // ---------- Estrutura da tela de prévia ----------
+    var tela = document.createElement('div');
+    tela.id = 'pdf-tela';
+    tela.setAttribute('role', 'dialog');
+    tela.setAttribute('aria-modal', 'true');
+    tela.setAttribute('aria-label', 'Exportar mapa em PDF');
+    tela.innerHTML =
+        '<div class="pdf-barra">' +
+            '<label>Título <input type="text" id="pdf-titulo" maxlength="90" autocomplete="off"></label>' +
+            '<label>Papel <select id="pdf-papel"><option value="A4">A4</option><option value="A3">A3</option></select></label>' +
+            '<label>Orientação <select id="pdf-orient"><option value="paisagem">Paisagem</option><option value="retrato">Retrato</option></select></label>' +
+            '<span class="pdf-esp"></span>' +
+            '<button type="button" class="pdf-btn sec" id="pdf-fechar">Voltar ao mapa</button>' +
+            '<button type="button" class="pdf-btn" id="pdf-gerar">Gerar PDF</button>' +
+            '<p class="pdf-dica">Arraste e use o zoom para enquadrar o mapa dentro da folha. Ao clicar em Gerar PDF, escolha “Salvar como PDF” como destino e deixe a escala de impressão em 100% (tamanho real) para que a escala numérica continue correta.</p>' +
+        '</div>' +
+        '<div class="pdf-area">' +
+            '<div class="folha paisagem" id="folha-pdf">' +
+                '<header class="fp-cab">' +
+                    '<img src="logo-ifrs-rio-grande.png" alt="" onerror="this.style.display=\'none\'">' +
+                    '<div><h1 id="fp-titulo"></h1><p id="fp-sub"></p></div>' +
+                '</header>' +
+                '<div class="fp-corpo">' +
+                    '<div class="fp-mapa" id="fp-mapa"></div>' +
+                    '<aside class="fp-leg" aria-label="Legenda"><h2>Legenda</h2><div class="fp-leg-corpo" id="fp-leg"></div></aside>' +
+                '</div>' +
+                '<footer class="fp-rod">' +
+                    '<span>Atlas interativo da formação do território brasileiro · IFRS, Campus Rio Grande · Projeto de pesquisa desenvolvido a partir do TCC de Vitória Mendonça Prestes · Coordenação: Jefferson Rodrigues dos Santos</span>' +
+                    '<span id="fp-info"></span>' +
+                '</footer>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(tela);
+
+    var folha = document.getElementById('folha-pdf');
+    var fpMapa = document.getElementById('fp-mapa');
+    var inTitulo = document.getElementById('pdf-titulo');
+    var selPapel = document.getElementById('pdf-papel');
+    var selOrient = document.getElementById('pdf-orient');
+
+    // ---------- Controles desenhados sobre o mapa: seta norte e escala ----------
+    var Norte = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function () {
+            var d = L.DomUtil.create('div', 'pdf-ctl pdf-norte');
+            d.setAttribute('aria-hidden', 'true');
+            d.innerHTML =
+                '<svg width="30" height="46" viewBox="0 0 30 46" xmlns="http://www.w3.org/2000/svg">' +
+                '<text x="15" y="12" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="13" fill="#10222f">N</text>' +
+                '<polygon points="15,16 25,42 15,35" fill="#10222f"/>' +
+                '<polygon points="15,16 5,42 15,35" fill="#fff" stroke="#10222f" stroke-width="1.2" stroke-linejoin="round"/>' +
+                '</svg>';
+            return d;
+        }
+    });
+    var Escala = L.Control.extend({
+        options: { position: 'bottomleft' },
+        onAdd: function () {
+            var d = L.DomUtil.create('div', 'pdf-ctl pdf-escala');
+            d.setAttribute('aria-hidden', 'true');
+            d.innerHTML = '<div class="pe-num"></div><div class="pe-barra"><i></i><i></i><i></i><i></i></div><div class="pe-rot"><span></span><span></span><span></span></div>';
+            return d;
+        }
+    });
+    new Norte().addTo(map);
+    var escalaCtl = new Escala().addTo(map);
+
+    function fmtDist(m) {
+        return m >= 1000 ? (m / 1000).toLocaleString('pt-BR') + ' km' : m.toLocaleString('pt-BR') + ' m';
+    }
+    function atualizarEscala() {
+        if (!ativo) { return; }
+        var c = map.getCenter(), z = map.getZoom();
+        var mpp = 156543.03392 * Math.cos(c.lat * Math.PI / 180) / Math.pow(2, z);   // metros por pixel (Web Mercator)
+        var D = null;
+        for (var e = -1; e <= 7; e++) {
+            [1, 2, 5].forEach(function (k) {
+                var v = k * Math.pow(10, e);
+                if (v / mpp <= 170) { D = v; }
+            });
+        }
+        if (D === null) { D = 1; }
+        var px = D / mpp;
+        var den = mpp * 96 / 0.0254;                                                   // 96 pixels por polegada
+        var mag = Math.pow(10, Math.floor(Math.log(den) / Math.LN10) - 1);
+        var raiz = escalaCtl.getContainer();
+        raiz.querySelector('.pe-num').textContent = 'Escala aproximada 1:' + (Math.round(den / mag) * mag).toLocaleString('pt-BR');
+        raiz.querySelector('.pe-barra').style.width = px + 'px';
+        var rot = raiz.querySelector('.pe-rot');
+        rot.style.width = px + 'px';
+        var sp = rot.querySelectorAll('span');
+        sp[0].textContent = '0';  sp[0].style.left = '0';
+        sp[1].textContent = fmtDist(D / 2); sp[1].style.left = '50%';
+        sp[2].textContent = fmtDist(D); sp[2].style.left = '100%';
+    }
+    map.on('moveend zoomend', atualizarEscala);
+
+    // ---------- Legenda e textos da folha ----------
+    function nomeBase() {
+        if (typeof BASES === 'undefined') { return ''; }
+        for (var i = 0; i < BASES.length; i++) { if (map.hasLayer(BASES[i].layer)) { return BASES[i].nome; } }
+        return '';
+    }
+    function periodoDe(c) {
+        if (typeof DATACAO_CAMADAS === 'undefined' || typeof textoIntervalo !== 'function') { return ''; }
+        var lista = DATACAO_CAMADAS[c.k];
+        if (!lista || !lista.length) { return ''; }
+        return lista.map(function (d) { return textoIntervalo(d.ini, d.fim); }).join(' e ');
+    }
+    function montarLegenda() {
+        var vazias = {};
+        if (typeof itens !== 'undefined') {
+            itens.forEach(function (it) { if (it.li.classList.contains('vazia')) { vazias[it.c.k] = true; } });
+        }
+        var html = '', total = 0;
+        GRUPOS.forEach(function (g) {
+            var lis = INFO_CAMADAS.filter(function (c) {
+                var l = window['layer_' + c.k];
+                return c.grupo === g && l && map.hasLayer(l) && !vazias[c.k];
+            });
+            if (!lis.length) { return; }
+            total += lis.length;
+            html += '<div class="fp-grp"><h3>' + g + '</h3><ul>' + lis.map(function (c) {
+                var p = periodoDe(c);
+                return '<li>' + amostra(c) + '<span>' + c.nome + (p ? '<span class="per">' + p + '</span>' : '') + '</span></li>';
+            }).join('') + '</ul></div>';
+        });
+        if (!total) {
+            html = '<p class="vazio">Nenhuma camada temática ligada. Volte ao mapa e ligue as camadas desejadas para que apareçam aqui.</p>';
+        }
+        document.getElementById('fp-leg').innerHTML = html;
+    }
+    function ajustarLegenda() {
+        var leg = document.getElementById('fp-leg');
+        var f = 8.5;
+        leg.style.fontSize = f + 'pt';
+        while ((leg.scrollHeight > leg.clientHeight + 1 || leg.scrollWidth > leg.clientWidth + 1) && f > 5.5) {
+            f -= 0.25;
+            leg.style.fontSize = f + 'pt';
+        }
+    }
+    function atualizarTextos() {
+        document.getElementById('fp-titulo').textContent = cfg.titulo || TITULO_PADRAO;
+        var sub = 'Atlas interativo';
+        if (typeof linhaDoTempo !== 'undefined' && linhaDoTempo.ativa) { sub += ' · Camadas filtradas para o ano ' + linhaDoTempo.ano; }
+        document.getElementById('fp-sub').textContent = sub;
+        var base = nomeBase();
+        document.getElementById('fp-info').textContent =
+            'Projeção Web Mercator (EPSG:3857)' + (base ? ' · Base: ' + base : '') + ' · Gerado em ' + new Date().toLocaleDateString('pt-BR');
+    }
+
+    // ---------- Tamanho da folha ----------
+    function aplicarFolha() {
+        var d = PAPEIS[cfg.papel], w = d[0], h = d[1];
+        if (cfg.orient === 'retrato') { var t = w; w = h; h = t; }
+        folha.style.setProperty('--fw', (w - 1) + 'mm');   // 1 mm de folga para não gerar página em branco
+        folha.style.setProperty('--fh', (h - 1) + 'mm');
+        folha.className = 'folha ' + cfg.orient;
+        estiloPagina.textContent = '@page { size: ' + cfg.papel + ' ' + (cfg.orient === 'retrato' ? 'portrait' : 'landscape') + '; margin: 0; }';
+    }
+    function reenquadrar(centro, zoom) {
+        requestAnimationFrame(function () {
+            map.invalidateSize({ animate: false });
+            map.setView(centro, zoom, { animate: false });
+            atualizarEscala();
+            ajustarLegenda();
+        });
+    }
+
+    // ---------- Abrir e fechar a prévia ----------
+    function abrir() {
+        if (ativo) { return; }
+        if (typeof fecharInfo === 'function') { fecharInfo(); }
+        if (typeof pararReproducao === 'function') { pararReproducao(); }
+        if (typeof alternarPainel === 'function' && window.matchMedia('(max-width: 760px)').matches) { alternarPainel(false); }
+        map.closePopup();
+        ativo = true;
+        inTitulo.value = cfg.titulo;
+        selPapel.value = cfg.papel;
+        selOrient.value = cfg.orient;
+        paiOriginal = mapEl.parentNode;
+        irmaoOriginal = mapEl.nextSibling;
+        var c = map.getCenter(), z = map.getZoom();
+        document.body.classList.add('modo-pdf');
+        aplicarFolha();
+        fpMapa.appendChild(mapEl);
+        atualizarTextos();
+        montarLegenda();
+        reenquadrar(c, z);
+        document.getElementById('pdf-gerar').focus();
+    }
+    function fechar() {
+        if (!ativo) { return; }
+        var c = map.getCenter(), z = map.getZoom();
+        ativo = false;
+        if (irmaoOriginal && irmaoOriginal.parentNode === paiOriginal) { paiOriginal.insertBefore(mapEl, irmaoOriginal); }
+        else { paiOriginal.appendChild(mapEl); }
+        document.body.classList.remove('modo-pdf');
+        estiloPagina.textContent = '';
+        requestAnimationFrame(function () {
+            map.invalidateSize({ animate: false });
+            map.setView(c, z, { animate: false });
+        });
+    }
+    function gerar() {
+        map.closePopup();
+        var tituloOriginal = document.title;
+        document.title = 'Atlas - ' + (cfg.titulo || TITULO_PADRAO);   // vira o nome sugerido do arquivo PDF
+        var voltar = function () {
+            document.title = tituloOriginal;
+            window.removeEventListener('afterprint', voltar);
+        };
+        window.addEventListener('afterprint', voltar);
+        setTimeout(function () { window.print(); }, 150);
+    }
+
+    inTitulo.addEventListener('input', function () { cfg.titulo = inTitulo.value.trim(); atualizarTextos(); });
+    function mudouFolha() {
+        cfg.papel = selPapel.value;
+        cfg.orient = selOrient.value;
+        var c = map.getCenter(), z = map.getZoom();
+        aplicarFolha();
+        reenquadrar(c, z);
+    }
+    selPapel.addEventListener('change', mudouFolha);
+    selOrient.addEventListener('change', mudouFolha);
+    document.getElementById('pdf-fechar').addEventListener('click', fechar);
+    document.getElementById('pdf-gerar').addEventListener('click', gerar);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ativo) { fechar(); } });
+
+    // ---------- Botão no rodapé do painel lateral ----------
+    var rodape = document.querySelector('#sidebar .sb-foot');
+    if (rodape) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'sb-export';
+        b.innerHTML =
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="m9.5 14.5 2.5 2.5 2.5-2.5"/></svg>' +
+            '<span>Exportar mapa em PDF</span>';
+        b.addEventListener('click', abrir);
+        rodape.insertBefore(b, rodape.firstChild);
+    }
+
+    window.exportarMapaPDF = abrir;   // permite chamar de outro ponto da página
+})();
+
+        </script>
     </body>
 </html>
