@@ -2328,6 +2328,7 @@
  * Funcionamento: o botão "Exportar mapa em PDF" (rodapé do painel lateral) abre uma prévia da folha.
  * O mapa passa para dentro da folha, o usuário enquadra a área desejada e clica em "Gerar PDF".
  * O navegador abre o diálogo de impressão, onde se escolhe "Salvar como PDF".
+ * "Baixar JPG" salva a mesma folha como imagem (usa a biblioteca html2canvas, carregada sob demanda do cdnjs).
  * Este script usa as variáveis do mapa.html: map, INFO_CAMADAS, GRUPOS, BASES, amostra,
  * textoIntervalo, DATACAO_CAMADAS, itens, linhaDoTempo, fecharInfo, pararReproducao, alternarPainel.
  */
@@ -2462,8 +2463,10 @@
             '<label>Orientação <select id="pdf-orient"><option value="paisagem">Paisagem</option><option value="retrato">Retrato</option></select></label>' +
             '<span class="pdf-esp"></span>' +
             '<button type="button" class="pdf-btn sec" id="pdf-fechar">Voltar ao mapa</button>' +
+            '<label>Resolução do JPG <select id="pdf-res"><option value="2">Padrão</option><option value="3">Alta</option></select></label>' +
+            '<button type="button" class="pdf-btn sec" id="pdf-jpg">Baixar JPG</button>' +
             '<button type="button" class="pdf-btn" id="pdf-gerar">Gerar PDF</button>' +
-            '<p class="pdf-dica">Arraste e use o zoom para enquadrar o mapa dentro da folha. Ao clicar em Gerar PDF, escolha “Salvar como PDF” como destino e deixe a escala de impressão em 100% (tamanho real) para que a escala numérica continue correta.</p>' +
+            '<p class="pdf-dica">Arraste e use o zoom para enquadrar o mapa dentro da folha. Ao clicar em Gerar PDF, escolha “Salvar como PDF” como destino e deixe a escala de impressão em 100% (tamanho real) para que a escala numérica continue correta. “Baixar JPG” salva a mesma folha como imagem, sem passar pelo diálogo de impressão.</p>' +
         '</div>' +
         '<div class="pdf-area">' +
             '<div class="folha paisagem" id="folha-pdf">' +
@@ -2488,6 +2491,8 @@
     var inTitulo = document.getElementById('pdf-titulo');
     var selPapel = document.getElementById('pdf-papel');
     var selOrient = document.getElementById('pdf-orient');
+    var selRes = document.getElementById('pdf-res');
+    var btnJpg = document.getElementById('pdf-jpg');
 
     // ---------- Controles desenhados sobre o mapa: seta norte e escala ----------
     var Norte = L.Control.extend({
@@ -2664,6 +2669,78 @@
         window.addEventListener('afterprint', voltar);
         setTimeout(function () { window.print(); }, 150);
     }
+
+    // ---------- Exportar como JPG ----------
+    var H2C_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    function carregarH2C() {
+        return new Promise(function (ok, erro) {
+            if (window.html2canvas) { ok(window.html2canvas); return; }
+            var s = document.createElement('script');
+            s.src = H2C_URL;
+            s.onload = function () { window.html2canvas ? ok(window.html2canvas) : erro(new Error('html2canvas ausente')); };
+            s.onerror = function () { erro(new Error('sem rede')); };
+            document.head.appendChild(s);
+        });
+    }
+    // Testa se o servidor do mapa base libera o uso da imagem (CORS). Sem isso o navegador bloqueia ou deixa em branco o fundo.
+    function baseExportavel() {
+        return new Promise(function (ok) {
+            var t = mapEl.querySelector('.leaflet-tile-pane img.leaflet-tile');
+            if (!t) { ok(true); return; }
+            var im = new Image();
+            var fim = setTimeout(function () { ok(true); }, 6000);
+            im.crossOrigin = 'anonymous';
+            im.onload = function () { clearTimeout(fim); ok(true); };
+            im.onerror = function () { clearTimeout(fim); ok(false); };
+            im.src = t.src;
+        });
+    }
+    function nomeArquivo() {
+        var n = (cfg.titulo || TITULO_PADRAO).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+        return 'atlas-' + (n || 'mapa') + '.jpg';
+    }
+    function baixarJPG() {
+        var rotulo = btnJpg.textContent;
+        var area = tela.querySelector('.pdf-area');
+        var rolagem = [area.scrollLeft, area.scrollTop];
+        var sombra = folha.style.boxShadow;
+        btnJpg.disabled = true;
+        btnJpg.textContent = 'Gerando…';
+        map.closePopup();
+        Promise.all([carregarH2C(), baseExportavel()]).then(function (r) {
+            if (!r[1] && !window.confirm('O mapa base atual não permite exportar como imagem: o fundo pode sair em branco ou o JPG pode falhar. Para um resultado completo, volte ao mapa e escolha o fundo “Mapa claro” ou “Relevo”.\n\nGerar o JPG mesmo assim?')) {
+                throw 'cancelado';
+            }
+            area.scrollLeft = 0;
+            area.scrollTop = 0;
+            folha.style.boxShadow = 'none';
+            return r[0](folha, { scale: Number(selRes.value) || 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 });
+        }).then(function (canvas) {
+            return new Promise(function (ok, erro) {
+                canvas.toBlob(function (b) { b ? ok(b) : erro(new Error('sem imagem')); }, 'image/jpeg', 0.92);
+            });
+        }).then(function (blob) {
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = nomeArquivo();
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+        }).catch(function (e) {
+            if (e !== 'cancelado') {
+                window.alert('Não foi possível gerar o JPG. Verifique a conexão com a internet e tente a resolução “Padrão”. Se o fundo atual for de satélite, troque para “Mapa claro” ou “Relevo”; o PDF continua disponível.');
+            }
+        }).then(function () {
+            folha.style.boxShadow = sombra;
+            area.scrollLeft = rolagem[0];
+            area.scrollTop = rolagem[1];
+            btnJpg.disabled = false;
+            btnJpg.textContent = rotulo;
+        });
+    }
+    btnJpg.addEventListener('click', baixarJPG);
 
     inTitulo.addEventListener('input', function () { cfg.titulo = inTitulo.value.trim(); atualizarTextos(); });
     function mudouFolha() {
