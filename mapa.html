@@ -1639,12 +1639,11 @@
         }
 
         // Mapas de fundo didáticos (sem imagem de satélite)
-        var layer_MapaClaro = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-            subdomains: 'abcd',
+        var layer_MapaClaro = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
             minZoom: 1,
             maxZoom: 28,
-            maxNativeZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            maxNativeZoom: 16,
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
         });
         var layer_Relevo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
             minZoom: 1,
@@ -2709,7 +2708,7 @@
         btnJpg.textContent = 'Gerando…';
         map.closePopup();
         Promise.all([carregarH2C(), baseExportavel()]).then(function (r) {
-            if (!r[1] && !window.confirm('O mapa base atual não permite exportar como imagem: o fundo pode sair em branco ou o JPG pode falhar. Para um resultado completo, volte ao mapa e escolha o fundo “Mapa claro” ou “Relevo”.\n\nGerar o JPG mesmo assim?')) {
+            if (!r[1] && !window.confirm('O mapa base atual não parece permitir exportar como imagem: o fundo pode sair em branco ou o JPG pode falhar. Para um resultado completo, volte ao mapa e escolha outro fundo, como “Mapa claro” ou “Relevo”.\n\nGerar o JPG mesmo assim?')) {
                 throw 'cancelado';
             }
             area.scrollLeft = 0;
@@ -2730,7 +2729,7 @@
             setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
         }).catch(function (e) {
             if (e !== 'cancelado') {
-                window.alert('Não foi possível gerar o JPG. Verifique a conexão com a internet e tente a resolução “Padrão”. Se o fundo atual for de satélite, troque para “Mapa claro” ou “Relevo”; o PDF continua disponível.');
+                window.alert('Não foi possível gerar o JPG. Verifique a conexão com a internet e tente a resolução “Padrão”. Se o problema continuar, troque o mapa base; o PDF continua disponível.');
             }
         }).then(function () {
             folha.style.boxShadow = sombra;
