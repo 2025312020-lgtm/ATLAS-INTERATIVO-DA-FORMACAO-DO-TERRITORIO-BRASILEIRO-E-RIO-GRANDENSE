@@ -435,6 +435,18 @@
         .linha-tempo .lt-tick.c { height: 11px; background: rgba(16, 34, 47, 0.6); }
         .linha-tempo .lt-rot { position: absolute; top: 14px; transform: translateX(-50%); font: 600 11.5px/1 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; }
         .linha-tempo .lt-nota { margin: 0 0 2px; font: 400 12px/1.4 var(--sans); color: var(--ink-2); }
+        /* Períodos das camadas ligadas, alinhados com a escala de anos */
+        .linha-tempo .lt-periodos { margin: 2px 10px 6px; max-height: 112px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+        .linha-tempo .lt-linhas { position: relative; }
+        .linha-tempo .lt-linha { position: relative; height: 16px; margin: 3px 0; transition: opacity .15s ease; }
+        .linha-tempo .lt-linha.fora { opacity: 0.4; }
+        .linha-tempo .lt-barra { position: absolute; top: 3px; height: 10px; min-width: 4px; border: 1px solid rgba(16, 34, 47, 0.38); border-radius: 3px; box-sizing: border-box; }
+        .linha-tempo .lt-barra.sem { left: 0; right: 0; width: auto; background: none !important; border: 1px dashed rgba(16, 34, 47, 0.3); }
+        .linha-tempo .lt-txt { position: absolute; top: 0; line-height: 16px; font: 600 11px/16px var(--sans); color: var(--ink); white-space: nowrap; pointer-events: none; }
+        .linha-tempo .lt-txt em { font-style: normal; font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+        .linha-tempo .lt-txt.dentro { text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff; }
+        .linha-tempo .lt-cursor { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--verde); border-radius: 1px; pointer-events: none; z-index: 2; display: none; }
+        .linha-tempo .lt-vazio { margin: 4px 0 2px; font: 400 12px/1.4 var(--sans); color: var(--ink-2); }
         @media (max-width: 1000px) {
             .leaflet-container .atlas-readout { display: none; }
             .leaflet-container .linha-tempo { right: 150px; }
@@ -443,6 +455,7 @@
             .leaflet-container .linha-tempo { left: 10px; right: 10px; bottom: 58px; padding: 8px 14px 6px; max-width: none; }
             .linha-tempo .lt-nota, .linha-tempo .lt-ano .sem { display: none; }
             .linha-tempo .lt-ano b { font-size: 21px; }
+            .linha-tempo .lt-periodos { max-height: 84px; }
         }
 
         /* ================= Feedback (abre o formulário em outra aba) ================= */
@@ -1709,6 +1722,7 @@
             });
             document.getElementById('sb-limpar').disabled = total === 0;
             if (typeof atualizarInfo === 'function') { atualizarInfo(); }
+            if (typeof atualizarPeriodos === 'function' && perEl) { atualizarPeriodos(); }
         }
         function definir(c, ligar) {
             var l = window['layer_' + c.k];
@@ -1995,6 +2009,7 @@
             '<div class="lt-corpo">' +
                 '<input type="range" id="lt-range" min="' + ANO_MIN + '" max="' + ANO_MAX + '" step="1" value="' + ANO_MIN + '" aria-label="Ano">' +
                 '<div class="lt-escala" id="lt-escala" aria-hidden="true"></div>' +
+                '<div class="lt-periodos" id="lt-periodos" role="group" aria-label="Períodos das camadas ligadas"></div>' +
                 '<p class="lt-nota" id="lt-nota"></p>' +
             '</div>';
         L.DomEvent.disableClickPropagation(ltEl);
@@ -2019,6 +2034,87 @@
             }
         })();
 
+        // Períodos das camadas ligadas: uma barra por camada, na mesma escala de anos da linha do tempo
+        var perEl = document.getElementById('lt-periodos');
+        function pctAno(a) { return (a - ANO_MIN) / (ANO_MAX - ANO_MIN) * 100; }
+        // Intervalos [início, fim] da camada (os mesmos que filtram as feições), limitados a 1500–hoje e unidos quando se encostam
+        function periodosDaCamada(c) {
+            if (c._periodos !== undefined) { return c._periodos; }
+            var l = window['layer_' + c.k], vistos = {}, lista = [];
+            ((l && l._todas) || []).forEach(function(s) {
+                (s._existencia || []).forEach(function(iv) {
+                    var a = Math.max(ANO_MIN, isFinite(iv[0]) ? iv[0] : ANO_MIN);
+                    var b = Math.min(ANO_MAX, isFinite(iv[1]) ? iv[1] : ANO_MAX);
+                    var k = a + '-' + b;
+                    if (a <= b && !vistos[k]) { vistos[k] = 1; lista.push([a, b]); }
+                });
+            });
+            lista.sort(function(x, y) { return x[0] - y[0]; });
+            var unidos = [];
+            lista.forEach(function(iv) {
+                var u = unidos[unidos.length - 1];
+                if (u && iv[0] <= u[1] + 1) { u[1] = Math.max(u[1], iv[1]); } else { unidos.push([iv[0], iv[1]]); }
+            });
+            c._periodos = unidos;
+            return unidos;
+        }
+        function fundoBarra(c) {
+            if (c.tipo === 'hachura') { return 'repeating-linear-gradient(' + (c.angulo > 0 ? 45 : 135) + 'deg,' + c.cor + ' 0 2px,transparent 2px 5px)'; }
+            if (c.tipo === 'hachuraX') {
+                return 'repeating-linear-gradient(45deg,' + c.cor + ' 0 1.5px,transparent 1.5px 5px),repeating-linear-gradient(135deg,' + c.cor + ' 0 1.5px,transparent 1.5px 5px)';
+            }
+            return c.cor || '#6b7a85';
+        }
+        function textoPeriodos(per) {
+            return per.map(function(iv) { return iv[0] + '–' + (iv[1] >= ANO_MAX ? 'hoje' : iv[1]); }).join(' e ');
+        }
+        function atualizarPeriodos() {
+            var ativos = itens.filter(function(it) {
+                var l = window['layer_' + it.c.k];
+                return l && map.hasLayer(l);
+            });
+            if (!ativos.length) {
+                perEl.innerHTML = '<p class="lt-vazio">Ligue camadas no painel para ver aqui o período de cada uma.</p>';
+                return;
+            }
+            var html = '<div class="lt-linhas">';
+            ativos.forEach(function(it) {
+                var c = it.c, per = periodosDaCamada(c), nome = escaparHtml(c.nome);
+                if (!per.length) {
+                    html += '<div class="lt-linha" title="' + nome + ': sem período cadastrado (sempre visível)"><i class="lt-barra sem"></i>' +
+                            '<span class="lt-txt dentro" style="left:6px">' + nome + ' <em>sem período</em></span></div>';
+                    return;
+                }
+                var ini = pctAno(per[0][0]), fim = pctAno(per[per.length - 1][1]), txt = textoPeriodos(per);
+                var pos = fim <= 58 ? 'left:calc(' + fim + '% + 6px)' :
+                          (ini >= 42 ? 'right:calc(' + (100 - ini) + '% + 6px)' : 'left:calc(' + ini + '% + 6px)');
+                var dentro = (fim > 58 && ini < 42) ? ' dentro' : '';
+                var borda = c.borda ? 'border-color:' + c.borda + ';' : '';
+                html += '<div class="lt-linha" data-iv="' + per.map(function(iv) { return iv[0] + '-' + iv[1]; }).join(',') + '" title="' + nome + ': ' + txt + '">';
+                per.forEach(function(iv) {
+                    html += '<i class="lt-barra" style="left:' + pctAno(iv[0]) + '%;width:' + (pctAno(iv[1]) - pctAno(iv[0])) + '%;background:' + fundoBarra(c) + ';' + borda + '"></i>';
+                });
+                html += '<span class="lt-txt' + dentro + '" style="' + pos + '">' + nome + ' <em>' + txt + '</em></span></div>';
+            });
+            html += '<i class="lt-cursor" id="lt-cursor"></i></div>';
+            perEl.innerHTML = html;
+            atualizarMarcadorPeriodos();
+        }
+        // Linha vertical no ano escolhido e destaque das camadas que existem nesse ano
+        function atualizarMarcadorPeriodos() {
+            var cur = document.getElementById('lt-cursor');
+            if (!cur) { return; }
+            cur.style.display = linhaDoTempo.ativa ? 'block' : 'none';
+            cur.style.left = pctAno(linhaDoTempo.ano) + '%';
+            Array.prototype.forEach.call(perEl.querySelectorAll('.lt-linha[data-iv]'), function(row) {
+                var existe = row.getAttribute('data-iv').split(',').some(function(s) {
+                    var ab = s.split('-');
+                    return +ab[0] <= linhaDoTempo.ano && linhaDoTempo.ano <= +ab[1];
+                });
+                row.classList.toggle('fora', linhaDoTempo.ativa && !existe);
+            });
+        }
+
         var ltRange = document.getElementById('lt-range');
         var ICON_PLAY = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>';
         var ICON_PAUSE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
@@ -2035,6 +2131,7 @@
                 : '<span class="sem">Todos os anos</span>';
             document.getElementById('lt-play').innerHTML = reproduzindo ? ICON_PAUSE : ICON_PLAY;
             document.getElementById('lt-play').setAttribute('aria-label', reproduzindo ? 'Pausar' : 'Reproduzir a linha do tempo');
+            atualizarMarcadorPeriodos();
         }
         function atualizarNotaLinhaDoTempo() {
             var nota = document.getElementById('lt-nota');
