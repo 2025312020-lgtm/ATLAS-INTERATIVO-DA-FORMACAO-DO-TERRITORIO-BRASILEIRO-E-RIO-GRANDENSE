@@ -365,14 +365,14 @@
         #carregando .cg-logo { display: block; width: auto; height: clamp(84px, 14vh, 120px); margin-bottom: 26px; }
         #carregando .cg-sub { margin: 0 0 10px; font: 600 14px/1.2 var(--sans, sans-serif); color: #278036; }
         #carregando h1 { margin: 0; max-width: 18ch; font: 700 clamp(1.7rem, 4.2vw, 2.6rem)/1.1 Arial, 'Helvetica Neue', Helvetica, sans-serif; letter-spacing: -0.02em; }
-        #carregando .cg-globo { display: block; width: 64px; height: 64px; margin: 34px 0 20px; }
-        #carregando .cg-giro { transform-origin: 32px 32px; animation: cg-gira 1.1s linear infinite; }
-        @keyframes cg-gira { to { transform: rotate(360deg); } }
-        #carregando .cg-barra { width: min(280px, 70vw); height: 5px; border-radius: 999px; background: #dfe6ea; overflow: hidden; }
-        #carregando .cg-barra i { display: block; width: 4%; height: 100%; border-radius: 999px; background: #278036; transition: width .35s ease-out; }
-        #carregando .cg-msg { margin: 14px 0 0; font: 500 13.5px/1.4 var(--sans, sans-serif); color: #4f616d; }
+        #carregando .cg-brasil { display: block; width: auto; height: clamp(150px, 31vh, 250px); margin: 26px 0 8px; overflow: visible; }
+        #carregando .cg-nivel { transition: transform .35s ease-out; }
+        #carregando .cg-onda { animation: cg-onda 1.6s linear infinite; }
+        @keyframes cg-onda { to { transform: translateX(-60px); } }
+        #carregando .cg-pct { margin: 0; font: 700 22px/1 Arial, 'Helvetica Neue', Helvetica, sans-serif; color: #278036; font-variant-numeric: tabular-nums; }
+        #carregando .cg-msg { margin: 10px 0 0; font: 500 13.5px/1.4 var(--sans, sans-serif); color: #4f616d; }
         @media (prefers-reduced-motion: reduce) {
-            #carregando .cg-giro { animation: none; }
+            #carregando .cg-onda { animation: none; }
             #carregando { transition: none; }
         }
 
@@ -734,30 +734,39 @@
             <img class="cg-logo" src="logo-ifrs-rio-grande.png" width="499" height="778" alt="Instituto Federal Rio Grande do Sul, Campus Rio Grande">
             <p class="cg-sub">Atlas interativo</p>
             <h1>Formação do território brasileiro</h1>
-            <svg class="cg-globo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-                <circle cx="32" cy="32" r="24" stroke="#c9d3d9" stroke-width="2"/>
-                <ellipse cx="32" cy="32" rx="10" ry="24" stroke="#c9d3d9" stroke-width="1.5"/>
-                <path d="M8 32h48M12 20h40M12 44h40" stroke="#c9d3d9" stroke-width="1.5"/>
-                <circle class="cg-giro" cx="32" cy="32" r="29" stroke="#278036" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="46 140"/>
+            <svg class="cg-brasil" viewBox="0 0 390 395" fill="none" aria-hidden="true">
+                <defs><clipPath id="cg-recorte"><path d="M215.9 9.5 L222.2 23.0 L225.1 35.0 L228.0 43.0 L231.8 52.0 L232.8 56.0 L244.4 59.0 L247.3 68.0 L260.8 61.0 L270.5 63.0 L282.1 76.0 L286.9 78.0 L299.5 78.0 L311.1 82.0 L328.4 81.0 L338.1 83.0 L342.9 90.0 L355.5 100.0 L362.2 104.0 L374.8 111.0 L378.2 124.0 L377.7 133.5 L374.8 143.0 L370.0 150.0 L363.2 158.0 L357.4 163.0 L348.7 173.0 L342.9 183.0 L338.1 193.0 L337.6 208.0 L336.2 228.0 L331.3 238.0 L328.4 251.0 L325.5 256.0 L318.8 271.0 L318.8 273.0 L311.1 281.0 L309.1 283.0 L297.5 283.0 L285.0 284.0 L276.3 291.0 L267.6 293.0 L252.1 303.0 L245.4 313.0 L245.8 328.0 L243.4 338.0 L234.7 346.0 L228.9 358.0 L221.2 368.0 L211.6 375.0 L199.0 390.5 L198.0 384.0 L200.9 379.0 L199.2 378.8 L191.7 371.7 L178.4 361.8 L169.5 356.8 L158.4 355.0 L163.4 350.5 L173.9 339.5 L181.6 332.0 L193.2 325.0 L196.6 315.5 L188.9 309.0 L187.4 307.0 L190.3 293.5 L179.7 288.0 L176.5 275.7 L169.0 274.0 L155.5 274.0 L155.5 270.0 L158.4 253.0 L157.9 243.0 L152.6 230.0 L150.7 216.0 L134.3 216.0 L133.3 208.0 L130.4 198.0 L125.6 188.0 L115.9 183.0 L106.3 179.0 L91.8 176.0 L84.0 165.0 L71.5 152.0 L55.1 162.0 L33.8 163.0 L19.3 148.0 L7.7 147.0 L11.6 129.0 L3.9 125.0 L1.0 119.0 L10.6 105.0 L38.6 95.0 L43.5 63.0 L38.6 47.0 L44.4 42.0 L40.6 36.0 L66.7 35.0 L62.8 33.0 L68.6 21.0 L96.6 12.0 L108.2 13.0 L128.5 1.0 L134.3 3.0 L137.2 9.0 L135.2 18.0 L140.1 36.0 L145.9 41.0 L164.2 33.0 L174.8 33.0 L187.4 30.0 L202.9 31.0 L209.6 21.0Z"/></clipPath></defs>
+                <path d="M215.9 9.5 L222.2 23.0 L225.1 35.0 L228.0 43.0 L231.8 52.0 L232.8 56.0 L244.4 59.0 L247.3 68.0 L260.8 61.0 L270.5 63.0 L282.1 76.0 L286.9 78.0 L299.5 78.0 L311.1 82.0 L328.4 81.0 L338.1 83.0 L342.9 90.0 L355.5 100.0 L362.2 104.0 L374.8 111.0 L378.2 124.0 L377.7 133.5 L374.8 143.0 L370.0 150.0 L363.2 158.0 L357.4 163.0 L348.7 173.0 L342.9 183.0 L338.1 193.0 L337.6 208.0 L336.2 228.0 L331.3 238.0 L328.4 251.0 L325.5 256.0 L318.8 271.0 L318.8 273.0 L311.1 281.0 L309.1 283.0 L297.5 283.0 L285.0 284.0 L276.3 291.0 L267.6 293.0 L252.1 303.0 L245.4 313.0 L245.8 328.0 L243.4 338.0 L234.7 346.0 L228.9 358.0 L221.2 368.0 L211.6 375.0 L199.0 390.5 L198.0 384.0 L200.9 379.0 L199.2 378.8 L191.7 371.7 L178.4 361.8 L169.5 356.8 L158.4 355.0 L163.4 350.5 L173.9 339.5 L181.6 332.0 L193.2 325.0 L196.6 315.5 L188.9 309.0 L187.4 307.0 L190.3 293.5 L179.7 288.0 L176.5 275.7 L169.0 274.0 L155.5 274.0 L155.5 270.0 L158.4 253.0 L157.9 243.0 L152.6 230.0 L150.7 216.0 L134.3 216.0 L133.3 208.0 L130.4 198.0 L125.6 188.0 L115.9 183.0 L106.3 179.0 L91.8 176.0 L84.0 165.0 L71.5 152.0 L55.1 162.0 L33.8 163.0 L19.3 148.0 L7.7 147.0 L11.6 129.0 L3.9 125.0 L1.0 119.0 L10.6 105.0 L38.6 95.0 L43.5 63.0 L38.6 47.0 L44.4 42.0 L40.6 36.0 L66.7 35.0 L62.8 33.0 L68.6 21.0 L96.6 12.0 L108.2 13.0 L128.5 1.0 L134.3 3.0 L137.2 9.0 L135.2 18.0 L140.1 36.0 L145.9 41.0 L164.2 33.0 L174.8 33.0 L187.4 30.0 L202.9 31.0 L209.6 21.0Z" fill="#dfe6ea"/>
+                <g clip-path="url(#cg-recorte)">
+                    <g class="cg-nivel" id="cg-nivel" style="transform:translateY(410px)">
+                        <path class="cg-onda" d="M-60 8 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 q15 -8 30 0 t30 0 V500 H-60Z" fill="#278036"/>
+                    </g>
+                </g>
+                <path d="M215.9 9.5 L222.2 23.0 L225.1 35.0 L228.0 43.0 L231.8 52.0 L232.8 56.0 L244.4 59.0 L247.3 68.0 L260.8 61.0 L270.5 63.0 L282.1 76.0 L286.9 78.0 L299.5 78.0 L311.1 82.0 L328.4 81.0 L338.1 83.0 L342.9 90.0 L355.5 100.0 L362.2 104.0 L374.8 111.0 L378.2 124.0 L377.7 133.5 L374.8 143.0 L370.0 150.0 L363.2 158.0 L357.4 163.0 L348.7 173.0 L342.9 183.0 L338.1 193.0 L337.6 208.0 L336.2 228.0 L331.3 238.0 L328.4 251.0 L325.5 256.0 L318.8 271.0 L318.8 273.0 L311.1 281.0 L309.1 283.0 L297.5 283.0 L285.0 284.0 L276.3 291.0 L267.6 293.0 L252.1 303.0 L245.4 313.0 L245.8 328.0 L243.4 338.0 L234.7 346.0 L228.9 358.0 L221.2 368.0 L211.6 375.0 L199.0 390.5 L198.0 384.0 L200.9 379.0 L199.2 378.8 L191.7 371.7 L178.4 361.8 L169.5 356.8 L158.4 355.0 L163.4 350.5 L173.9 339.5 L181.6 332.0 L193.2 325.0 L196.6 315.5 L188.9 309.0 L187.4 307.0 L190.3 293.5 L179.7 288.0 L176.5 275.7 L169.0 274.0 L155.5 274.0 L155.5 270.0 L158.4 253.0 L157.9 243.0 L152.6 230.0 L150.7 216.0 L134.3 216.0 L133.3 208.0 L130.4 198.0 L125.6 188.0 L115.9 183.0 L106.3 179.0 L91.8 176.0 L84.0 165.0 L71.5 152.0 L55.1 162.0 L33.8 163.0 L19.3 148.0 L7.7 147.0 L11.6 129.0 L3.9 125.0 L1.0 119.0 L10.6 105.0 L38.6 95.0 L43.5 63.0 L38.6 47.0 L44.4 42.0 L40.6 36.0 L66.7 35.0 L62.8 33.0 L68.6 21.0 L96.6 12.0 L108.2 13.0 L128.5 1.0 L134.3 3.0 L137.2 9.0 L135.2 18.0 L140.1 36.0 L145.9 41.0 L164.2 33.0 L174.8 33.0 L187.4 30.0 L202.9 31.0 L209.6 21.0Z" stroke="#10222f" stroke-width="2.5" stroke-linejoin="round"/>
             </svg>
-            <div class="cg-barra"><i id="cg-barra"></i></div>
+            <p class="cg-pct" id="cg-pct">0%</p>
             <p class="cg-msg" id="cg-msg">Carregando mapas e camadas…</p>
         </div>
         <script>
             // Controle da tela de carregamento (roda antes dos demais scripts)
             (function() {
-                var el = document.getElementById('carregando'), barra = document.getElementById('cg-barra'), msg = document.getElementById('cg-msg');
+                var el = document.getElementById('carregando'), nivel = document.getElementById('cg-nivel'), pct = document.getElementById('cg-pct'), msg = document.getElementById('cg-msg');
                 var p = 4, feito = false;
+                function mostrar(v) {                           // o Brasil enche de baixo para cima
+                    nivel.style.transform = 'translateY(' + (-14 + 424 * (1 - v / 100)) + 'px)';   // de 410 (vazio, abaixo do mapa) a -14 (cheio, acima da onda)
+                    pct.textContent = Math.round(v) + '%';
+                }
+                mostrar(p);
                 var timer = setInterval(function() {            // avança devagar até 90% enquanto os dados carregam
                     p += (90 - p) * 0.07;
-                    barra.style.width = p + '%';
+                    mostrar(p);
                 }, 150);
                 window.mensagemCarregamento = function(s) { if (msg) { msg.textContent = s; } };
                 window.fecharCarregamento = function() {
                     if (feito || !el) { return; }
                     feito = true;
                     clearInterval(timer);
-                    barra.style.width = '100%';
+                    mostrar(100);
                     setTimeout(function() {
                         el.classList.add('pronto');
                         setTimeout(function() { if (el.parentNode) { el.parentNode.removeChild(el); } }, 700);
