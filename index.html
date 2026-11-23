@@ -131,6 +131,10 @@
         }
         .cta:hover { background: var(--verde-escuro); box-shadow: 0 12px 28px rgba(39, 128, 54, 0.36); }
         .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+        .acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 38px; }
+        .acoes .cta { margin-top: 0; }
+        .cta.sec { background: transparent; color: var(--verde); box-shadow: inset 0 0 0 2px var(--verde); }
+        .cta.sec:hover { background: rgba(39, 128, 54, 0.1); box-shadow: inset 0 0 0 2px var(--verde-escuro); color: var(--verde-escuro); }
 
         /* Foto de Ouro Preto */
         .foto { position: relative; margin: 0; min-height: 320px; background: #cfd8dc; overflow: hidden; }
@@ -168,19 +172,22 @@
         #gal-credito { display: block; margin-top: 4px; font-weight: 500; font-size: 11.5px; opacity: 0.9; }
         #gal-credito:empty { display: none; }
 
-        /* ---------- Temas ---------- */
-        .sobre {
-            padding: clamp(36px, 6vh, 64px) clamp(24px, 7vw, 112px) clamp(20px, 3vh, 36px);
+        /* ---------- Texto explicativo ---------- */
+        .resumo {
+            margin: 0 clamp(24px, 7vw, 112px);
+            padding: 26px 0 28px;
             border-top: 1px solid var(--hair);
+            column-count: 2;
+            column-gap: 48px;
         }
-        .sobre h2 { margin: 0 0 24px; font: 700 clamp(1.3rem, 2.2vw, 1.7rem)/1.2 var(--titulo); letter-spacing: -0.01em; }
-        .sobre-texto {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0 clamp(32px, 5vw, 72px);
-            max-width: 1180px;
+        .resumo p {
+            margin: 0 0 14px;
+            font: 400 14.5px/1.65 var(--sans);
+            color: var(--ink-2);
+            text-align: left;
+            break-inside: avoid-column;
         }
-        .sobre-texto p { margin: 0 0 1.1em; max-width: 64ch; font: 400 15.5px/1.7 var(--sans); color: #2b3c48; }
+        .resumo p:last-child { margin-bottom: 0; }
 
         footer {
             display: flex;
@@ -199,16 +206,17 @@
         footer .links { display: flex; flex-wrap: wrap; gap: 6px 24px; }
 
         @media (max-width: 900px) {
-            .sobre-texto { grid-template-columns: 1fr; }
             .hero { grid-template-columns: 1fr; }
             .meridiano { display: none; }
             main { padding-right: clamp(24px, 7vw, 112px); }
             .foto { min-height: 0; height: clamp(220px, 50vw, 380px); }
+            .resumo { column-count: 1; }
         }
         @media (max-width: 560px) {
             .apoio { padding-left: 16px; }
             .apoio div { gap: 16px; }
             .apoio .cnpq { height: 30px; }
+            .acoes { flex-direction: column; align-items: stretch; }
             .cta { width: 100%; justify-content: center; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -239,7 +247,10 @@
                 <p class="sub">Atlas interativo</p>
                 <h1>Formação do território brasileiro</h1>
                 <p class="lead">Explore sobre imagem de satélite os ciclos econômicos, os caminhos e as levas de colonização que moldaram o território. Ative as camadas que quiser e passe o mouse sobre o mapa para ver os detalhes de cada uma.</p>
-                <a class="cta" href="mapa.html">Acessar plataforma</a>
+                <div class="acoes">
+                    <a class="cta" href="mapa.html">Acessar plataforma</a>
+                    <a class="cta sec" href="guia-professor.html">Guia do professor</a>
+                </div>
             </main>
         </div>
 
@@ -251,18 +262,11 @@
         </figure>
     </div>
 
-    <section class="sobre" aria-labelledby="sobre-titulo">
-        <h2 id="sobre-titulo">Sobre o projeto</h2>
-        <div class="sobre-texto">
-            <div>
-                <p>A representação cartográfica evoluiu para uma linguagem visual autônoma, fundamental na interpretação das dinâmicas socioeconômicas e territoriais. Todavia, enquanto o campo técnico-científico opera com geotecnologias contemporâneas, o ensino de Geografia permanece dependente de suportes analógicos. Para aproximar essas realidades, desenvolve-se essa plataforma em ambiente WebSIG para o ensino da formação territorial do Brasil, visando a alfabetização cartográfica na Educação Básica.</p>
-                <p>A metodologia abrange o georreferenciamento de mapas históricos, vetorização e associação de atributos, aplicando padrões de hachuras e cores de alto contraste para garantir a acessibilidade a partir do Desenho Universal para a Aprendizagem (DUA). Na web, viabiliza-se a transposição didática por uma interface interativa e multiescalar.</p>
-            </div>
-            <div>
-                <p>Como resultado, o protótipo permite sobrepor camadas, consultar pop-ups, informações e exportar os mapas criados.</p>
-                <p>Como passos futuros, pretende-se concluir as camadas temporais pendentes, realizar testes de usabilidade com professores e estudantes, e elaborar um guia com orientações didáticas. O WebSIG contribui para o ensino de Geografia ao substituir a observação passiva de mapas pela construção ativa e dinâmica do conhecimento, promovendo o protagonismo dos estudantes.</p>
-            </div>
-        </div>
+    <section class="resumo" aria-label="Sobre o projeto">
+        <p>A representação cartográfica evoluiu para uma linguagem visual autônoma, fundamental na interpretação das dinâmicas socioeconômicas e territoriais. Todavia, enquanto o campo técnico-científico opera com geotecnologias, o ensino de Geografia permanece dependente de suportes analógicos. Para aproximar essas realidades, desenvolveu-se uma plataforma em ambiente WebSIG para o ensino da formação territorial do Brasil e do Rio Grande do Sul, visando a alfabetização cartográfica na Educação Básica.</p>
+        <p>A metodologia abrange o georreferenciamento de mapas históricos, vetorização e associação de atributos, aplicando padrões de hachuras e cores de alto contraste para garantir a acessibilidade a partir do Desenho Universal para a Aprendizagem (DUA). Na web, viabiliza-se a transposição didática por uma interface interativa e multiescalar.</p>
+        <p>Como resultado, o protótipo atua parcialmente operacional e publicado, permitindo sobrepor camadas, consultar pop-ups e utilizar padrões acessíveis. O projeto enfrentou desafios metodológicos no georreferenciamento e vetorização de mapas históricos heterogêneos.</p>
+        <p>Como passos futuros, pretende-se concluir as camadas temporais pendentes, realizar testes de usabilidade com professores e estudantes, e elaborar um guia com orientações didáticas. Conclui-se que o WebSIG contribui para o ensino de Geografia ao substituir a observação passiva de mapas pela construção ativa e dinâmica do conhecimento, promovendo o protagonismo dos estudantes.</p>
     </section>
 
     <footer>
@@ -271,6 +275,7 @@
             <p>Coordenação: Jefferson Rodrigues dos Santos. Bolsistas: Murilo Dias dos Santos e Veridiana Feijó da Rosa.</p>
         </div>
         <div class="links">
+            <a href="guia-professor.html">Guia do professor</a>
             <a href="https://raw.githubusercontent.com/ProfessorJeffersonSantos/ATLAS-INTERATIVO-DA-FORMACAO-DO-TERRITORIO-BRASILEIRO-E-RIO-GRANDENSE/main/Vit%C3%B3riaPrestesTCC_2025.pdf" target="_blank" rel="noopener">Ler o TCC (PDF)</a>
             <a id="link-feedback" target="_blank" rel="noopener" hidden>Enviar comentários</a>
         </div>
