@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guia do professor | Atlas interativo da formação do território brasileiro</title>
+    <meta name="description" content="Sete atividades para usar o atlas interativo em sala de aula, com roteiros, adaptações de acessibilidade, critérios de avaliação e solução de problemas.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #10222f;
+            --ink-2: #4f616d;
+            --paper: #eef3f5;
+            --card: #ffffff;
+            --hair: rgba(16, 34, 47, 0.14);
+            --verde: #278036;
+            --verde-escuro: #1d6a2b;
+            --verde-claro: #e6f2e8;
+            --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --titulo: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+        body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.65; }
+        a { color: var(--verde); }
+        a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+        .pular { position: absolute; left: 12px; top: -60px; z-index: 10; padding: 10px 16px; background: var(--ink); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .pular:focus { top: 12px; }
+
+        /* Cabeçalho */
+        .topo { background: var(--card); border-bottom: 1px solid var(--hair); }
+        .topo-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; max-width: 1180px; margin: 0 auto; padding: 14px clamp(20px, 5vw, 48px); }
+        .topo img { display: block; height: 64px; width: auto; }
+        .topo nav { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 600 15px/1 var(--sans); }
+        .topo nav a { text-decoration: none; padding: 8px 0; }
+        .topo nav a:hover { text-decoration: underline; }
+        .btn { display: inline-flex; align-items: center; height: 44px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--verde); color: #fff !important; font: 600 15px/1 var(--sans); text-decoration: none !important; cursor: pointer; }
+        .btn:hover { background: var(--verde-escuro); }
+        .btn.sec { background: transparent; color: var(--verde) !important; box-shadow: inset 0 0 0 1.5px var(--verde); }
+        .btn.sec:hover { background: var(--verde-claro); }
+
+        .capa { max-width: 1180px; margin: 0 auto; padding: clamp(32px, 6vw, 64px) clamp(20px, 5vw, 48px) 8px; }
+        .capa .sub { margin: 0 0 12px; font: 600 15px/1.2 var(--sans); color: var(--verde); }
+        .capa h1 { margin: 0; max-width: 20ch; font: 700 clamp(2.2rem, 5vw, 3.8rem)/1.08 var(--titulo); letter-spacing: -0.02em; }
+        .capa .lead { max-width: 62ch; margin: 22px 0 0; font-size: 1.12rem; color: var(--ink-2); }
+        .capa .acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+        /* Corpo com sumário lateral */
+        .miolo { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 48px; max-width: 1180px; margin: 0 auto; padding: 32px clamp(20px, 5vw, 48px) 72px; }
+        .sumario { position: sticky; top: 20px; align-self: start; font: 500 15px/1.4 var(--sans); }
+        .sumario h2 { margin: 0 0 10px; font: 700 13px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+        .sumario ol { margin: 0; padding: 0; list-style: none; border-left: 2px solid var(--hair); }
+        .sumario a { display: block; padding: 7px 0 7px 14px; margin-left: -2px; border-left: 2px solid transparent; color: var(--ink); text-decoration: none; }
+        .sumario a:hover { color: var(--verde); border-left-color: var(--verde); }
+        .sumario .sub a { padding-left: 28px; font-size: 14px; color: var(--ink-2); }
+
+        main section { margin-bottom: 56px; }
+        main h2 { margin: 0 0 16px; font: 700 clamp(1.6rem, 3vw, 2.1rem)/1.15 var(--titulo); letter-spacing: -0.01em; }
+        main h3 { margin: 0 0 8px; font: 700 1.25rem/1.3 var(--titulo); }
+        main p { margin: 0 0 14px; }
+        main ul, main ol { margin: 0 0 16px; padding-left: 1.3em; }
+        main li { margin-bottom: 6px; }
+        main li::marker { color: var(--verde); font-weight: 700; }
+
+        .tabela { overflow-x: auto; margin: 0 0 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.5; }
+        th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--hair); }
+        th { background: #f4f8f6; font-weight: 700; white-space: nowrap; }
+        tr:last-child td { border-bottom: 0; }
+        td:first-child { font-weight: 600; }
+        .tabela.larga table { min-width: 720px; }
+
+        /* Atividades */
+        .ativ { margin: 0 0 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 14px; overflow: hidden; }
+        .ativ summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 18px 22px; cursor: pointer; list-style: none; }
+        .ativ summary::-webkit-details-marker { display: none; }
+        .ativ summary { position: relative; padding-right: 60px; }
+        .ativ summary::after { content: '+'; position: absolute; right: 22px; top: 14px; font: 400 30px/1 var(--sans); color: var(--verde); }
+        .ativ[open] summary::after { content: '\2212'; }
+        .ativ .num { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--verde); color: #fff; font: 700 17px/1 var(--titulo); }
+        .ativ .tit { font: 700 1.2rem/1.25 var(--titulo); }
+        .ativ .meta { flex-basis: 100%; margin-left: 52px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .ativ .meta span { padding: 3px 11px; border-radius: 999px; background: var(--verde-claro); color: var(--verde-escuro); font: 600 13px/1.5 var(--sans); }
+        .ativ .corpo { padding: 4px 22px 22px 22px; border-top: 1px solid var(--hair); }
+        .ativ h4 { margin: 18px 0 6px; font: 700 13px/1.2 var(--sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-2); }
+        .ativ .corpo p, .ativ .corpo li { font-size: 16.5px; }
+        .dica { margin: 18px 0 0; padding: 12px 16px; background: var(--verde-claro); border-left: 4px solid var(--verde); border-radius: 0 10px 10px 0; font-size: 15.5px; }
+        .nota { padding: 14px 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 12px; font-size: 15.5px; color: var(--ink-2); }
+
+        .rodape { border-top: 1px solid var(--hair); background: var(--card); }
+        .rodape-in { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; max-width: 1180px; margin: 0 auto; padding: 22px clamp(20px, 5vw, 48px) 28px; font: 500 14px/1.5 var(--sans); color: var(--ink-2); }
+        .rodape p { margin: 0; }
+        .rodape strong { color: var(--ink); }
+
+        @media (max-width: 900px) {
+            .miolo { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+            .sumario { position: static; margin-bottom: 24px; padding: 16px 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 12px; }
+            .sumario .sub { display: none; }
+            .topo img { height: 52px; }
+        }
+        @media (max-width: 560px) {
+            body { font-size: 16.5px; }
+            .ativ .meta { margin-left: 0; }
+            .ativ summary { padding: 16px; }
+            .ativ .corpo { padding: 4px 16px 18px; }
+        }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+        /* Impressão: o professor costuma imprimir o guia */
+        @media print {
+            body { background: #fff; font-size: 11.5pt; }
+            .topo, .sumario, .acoes, .pular, .btn { display: none !important; }
+            .capa { padding: 0 0 12pt; }
+            .miolo { display: block; padding: 0; }
+            .ativ { break-inside: avoid; border-color: #999; }
+            .ativ .corpo { display: block !important; }
+            .ativ summary::after { content: none; }
+            .tabela { overflow: visible; }
+            .tabela.larga table { min-width: 0; }
+            main section { margin-bottom: 22pt; }
+            a { color: inherit; text-decoration: none; }
+        }
+    </style>
+    <script>
+        // Para a impressão: abre todas as atividades antes de imprimir
+        window.addEventListener('beforeprint', function () {
+            document.querySelectorAll('details.ativ').forEach(function (d) { d.setAttribute('data-estava', d.open ? '1' : '0'); d.open = true; });
+        });
+        window.addEventListener('afterprint', function () {
+            document.querySelectorAll('details.ativ').forEach(function (d) { d.open = d.getAttribute('data-estava') === '1'; });
+        });
+    </script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Ir para o conteúdo</a>
+
+    <header class="topo">
+        <div class="topo-in">
+            <a href="index.html" aria-label="Página inicial do atlas"><img src="logo-ifrs-rio-grande.png" width="499" height="778" alt="Instituto Federal Rio Grande do Sul, Campus Rio Grande"></a>
+            <nav aria-label="Navegação do site">
+                <a href="index.html">Página inicial</a>
+                <a href="mapa.html">Abrir o atlas</a>
+                <a href="guia-professor.html" aria-current="page">Guia do professor</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="capa">
+        <p class="sub">Guia do professor</p>
+        <h1>Atlas interativo em sala de aula</h1>
+        <p class="lead">Sete atividades de 15 a 100 minutos para trabalhar a formação territorial do Brasil e do Rio Grande do Sul com o atlas, do 7º ano do Ensino Fundamental ao Ensino Médio. Cada uma traz o roteiro, as camadas indicadas e uma forma de registrar o que os estudantes aprenderam.</p>
+        <div class="acoes">
+            <a class="btn" href="mapa.html">Abrir o atlas</a>
+            <button class="btn sec" type="button" onclick="window.print()">Imprimir o guia</button>
+        </div>
+    </div>
+
+    <div class="miolo">
+        <nav class="sumario" aria-label="Neste guia">
+            <h2>Neste guia</h2>
+            <ol>
+                <li><a href="#conhecendo">Conhecendo o atlas</a></li>
+                <li><a href="#antes">Antes da aula</a></li>
+                <li><a href="#atividades">Atividades</a></li>
+                <li class="sub"><a href="#a1">1. Exploração livre</a></li>
+                <li class="sub"><a href="#a2">2. Ciclos econômicos</a></li>
+                <li class="sub"><a href="#a3">3. Máquina do tempo</a></li>
+                <li class="sub"><a href="#a4">4. Limites e fronteiras</a></li>
+                <li class="sub"><a href="#a5">5. Rotas e tropas</a></li>
+                <li class="sub"><a href="#a6">6. Quem colonizou o meu município?</a></li>
+                <li class="sub"><a href="#a7">7. Meu mapa temático</a></li>
+                <li><a href="#acessibilidade">Acessibilidade e DUA</a></li>
+                <li><a href="#avaliacao">Avaliação</a></li>
+                <li><a href="#problemas">Se algo não funcionar</a></li>
+            </ol>
+        </nav>
+
+        <main id="conteudo">
+            <section id="conhecendo">
+                <h2>Conhecendo o atlas</h2>
+                <p>O atlas é uma plataforma WebSIG que reúne mapas históricos georreferenciados sobre mapas base reais. Os estudantes ligam camadas, consultam informações e comparam períodos, em vez de apenas observar uma imagem fixa.</p>
+                <ul>
+                    <li><strong>Painel de camadas:</strong> as camadas estão em quatro grupos: <em>Ciclos econômicos</em> (fumo, pau-brasil, cana de açúcar, café, drogas do sertão e borracha, mate, pecuária e algodão), <em>Caminhos</em> (Missões, Vacaria dos Pinhais, Praia, tropas e alternativos), <em>Imigração e colonização</em> (alemães, italianos, açorianos, outras etnias e zonas de colonização) e <em>Outros</em> (reduções, rumos dos bandeirantes e Tordesilhas). Há um campo de busca por nome.</li>
+                    <li><strong>Mapa base:</strong> Satélite, Satélite com nomes, Mapa claro e Relevo. Os fundos claros deixam as camadas mais legíveis no projetor.</li>
+                    <li><strong>Linha do tempo:</strong> ao ligar “Filtrar por ano” ou arrastar o controle, o mapa mostra só o que existia no ano escolhido, de 1500 até hoje. O botão de reproduzir passa os anos sozinho, e barras sob a régua mostram o período de cada camada ligada.</li>
+                    <li><strong>Botão “i”:</strong> abre o texto explicativo da camada, com o período, a fonte e a justificativa.</li>
+                    <li><strong>Pop-ups:</strong> ao clicar numa feição do mapa, aparecem os atributos dela.</li>
+                    <li><strong>Acessibilidade:</strong> as camadas usam cores de alto contraste e padrões de hachura, então não dependem só da cor.</li>
+                    <li><strong>Exportar:</strong> o botão “Exportar mapa em PDF” gera uma folha com título, seta norte, escala e legenda. Também é possível salvar em JPG.</li>
+                </ul>
+            </section>
+
+            <section id="antes">
+                <h2>Antes da aula</h2>
+                <p>Uma preparação de 15 minutos evita a maior parte dos imprevistos.</p>
+                <ol>
+                    <li><strong>Teste o acesso:</strong> abra o atlas no computador ou projetor da sala e espere a tela de carregamento terminar. O atlas precisa de internet para baixar o mapa base.</li>
+                    <li><strong>Escolha o mapa base:</strong> use “Mapa claro” ou “Relevo” em projetores fracos, e “Satélite” quando quiser mostrar o relevo e a vegetação.</li>
+                    <li><strong>Defina os grupos:</strong> duplas ou trios funcionam bem com um computador ou celular por grupo. Sem aparelhos suficientes, projete o atlas e conduza a atividade com a turma toda.</li>
+                    <li><strong>Separe o material de apoio:</strong> folha ou caderno para anotar, lápis de cor e, nas atividades de traçado, uma folha com o contorno do Brasil impresso.</li>
+                    <li><strong>Prepare a pergunta-guia:</strong> escreva no quadro uma pergunta que a turma responderá com o mapa, por exemplo “Por que o café se concentrou no Sudeste e o mate no Sul?”.</li>
+                </ol>
+                <p>No celular, abra o painel de camadas pelo botão “Camadas”. A linha do tempo fica na parte de baixo da tela e pode ser recolhida.</p>
+            </section>
+
+            <section id="atividades">
+                <h2>Atividades</h2>
+                <p>As sete atividades vão do mais simples ao mais autônomo. A ordem sugerida vai da exploração livre até a produção de um mapa pelos estudantes, mas cada uma funciona sozinha. Os anos são sugestões: ajuste ao seu planejamento.</p>
+                <div class="tabela larga">
+                    <table>
+                        <thead><tr><th>Nº</th><th>Atividade</th><th>Ano sugerido</th><th>Tempo</th><th>Camadas principais</th><th>Objetivo</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td><a href="#a1">Exploração livre</a></td><td>7º ano em diante</td><td>15 min</td><td>Qualquer uma</td><td>Familiarizar-se com camadas, legenda e pop-ups</td></tr>
+                            <tr><td>2</td><td><a href="#a2">Ciclos econômicos: onde e quando?</a></td><td>7º ao 9º ano</td><td>50 min</td><td>Cana de Açúcar, Café</td><td>Relacionar atividade econômica, território e época</td></tr>
+                            <tr><td>3</td><td><a href="#a3">Máquina do tempo</a></td><td>7º ao 9º ano</td><td>30 min</td><td>Linha do tempo, todos os ciclos</td><td>Perceber a mudança do território ao longo dos séculos</td></tr>
+                            <tr><td>4</td><td><a href="#a4">Limites e fronteiras</a></td><td>8º ano ao Ensino Médio</td><td>50 min</td><td>Tordesilhas, Rumos dos Bandeirantes, Reduções</td><td>Entender como o território ultrapassou o limite de Tordesilhas</td></tr>
+                            <tr><td>5</td><td><a href="#a5">Rotas e tropas</a></td><td>7º ao 9º ano</td><td>50 min</td><td>Caminhos, Pecuária</td><td>Ligar caminhos, tropeirismo e ocupação do Sul</td></tr>
+                            <tr><td>6</td><td><a href="#a6">Quem colonizou o meu município?</a></td><td>7º ano ao Ensino Médio</td><td>50 a 100 min</td><td>Alemães, Italianos, Açorianos, zonas de colonização</td><td>Reconhecer as marcas da imigração no lugar onde vivem</td></tr>
+                            <tr><td>7</td><td><a href="#a7">Meu mapa temático</a></td><td>8º ano ao Ensino Médio</td><td>100 min</td><td>Escolhidas pela dupla</td><td>Produzir e apresentar um mapa com título, escala, seta norte e legenda</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <details class="ativ" id="a1">
+                    <summary><span class="num">1</span><span class="tit">Exploração livre</span><span class="meta"><span>15 min</span><span>Duplas</span><span>Qualquer camada</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Perder o receio do mapa digital e entender o que cada parte da tela faz. É a melhor primeira aula com o atlas.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li>Peça que cada dupla abra o atlas e ligue três camadas de grupos diferentes.</li>
+                            <li>Eles clicam numa feição do mapa e leem o pop-up, depois abrem o botão “i” de uma camada.</li>
+                            <li>Trocam o mapa base e observam o que muda na leitura das camadas.</li>
+                            <li>No caderno, anotam três observações e uma dúvida.</li>
+                        </ol>
+                        <h4>Fechamento</h4>
+                        <p>Recolha as dúvidas no quadro. Elas costumam indicar por onde começar as atividades seguintes.</p>
+                        <p class="dica"><strong>Dica:</strong> proponha um desafio rápido, como “quem encontra a camada mais antiga?”, para dar um objetivo à exploração.</p>
+                    </div>
+                </details>
+
+                <details class="ativ" id="a2">
+                    <summary><span class="num">2</span><span class="tit">Ciclos econômicos: onde e quando?</span><span class="meta"><span>50 min</span><span>Duplas</span><span>Cana de Açúcar, Café</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Comparar dois ciclos econômicos e explicar por que o eixo econômico do país se deslocou ao longo do tempo.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li>Com só a camada <em>Cana de Açúcar</em> ligada, os estudantes anotam as regiões que aparecem. No botão “i”, leem o período (1530 a 1700) e a justificativa.</li>
+                            <li>Desligam a cana e repetem o processo com o <em>Café</em> (1830 a 1930).</li>
+                            <li>Preenchem o quadro: <strong>produto, onde, quando, por que ali?</strong></li>
+                            <li>Ligam as duas camadas e usam a linha do tempo em 1650 e em 1900 para ver qual delas aparece em cada ano.</li>
+                            <li>Respondem por escrito: o que mudou entre um ciclo e outro?</li>
+                        </ol>
+                        <h4>Fechamento</h4>
+                        <p>Compare as respostas na lousa. O texto explicativo da cana menciona a descoberta de ouro em Minas Gerais como um dos fatores do deslocamento: pergunte se alguém o relacionou.</p>
+                        <p class="dica"><strong>Variação:</strong> repita com outro par de camadas, como Fumo e Pecuária, e peça que a turma escolha o par que mais a surpreende.</p>
+                    </div>
+                </details>
+
+                <details class="ativ" id="a3">
+                    <summary><span class="num">3</span><span class="tit">Máquina do tempo</span><span class="meta"><span>30 min</span><span>Turma toda ou duplas</span><span>Linha do tempo</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Perceber que o território não nasceu pronto: foi sendo ocupado e transformado em etapas.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li>Ligue todos os ciclos econômicos e ative “Filtrar por ano”.</li>
+                            <li>Pare a linha do tempo em 1500, 1600, 1750, 1850, 1930 e no ano atual. Em cada um, os estudantes anotam quais camadas aparecem.</li>
+                            <li>Use o botão de reproduzir uma vez, sem pausas, para ver o conjunto como uma animação, e peça que a turma diga o que percebeu.</li>
+                            <li>Cada estudante desenha no caderno uma linha do tempo com os ciclos na ordem em que aparecem.</li>
+                        </ol>
+                        <h4>Fechamento</h4>
+                        <p>Pergunte quais camadas se sobrepõem no tempo. As barras sob a régua mostram os períodos de cada camada ligada, o que ajuda a enxergar as sobreposições.</p>
+                        <p class="dica"><strong>Atenção:</strong> uma camada esmaecida na lista do painel significa que ela não tem registros naquele ano. Aproveite para perguntar por quê.</p>
+                    </div>
+                </details>
+
+                <details class="ativ" id="a4">
+                    <summary><span class="num">4</span><span class="tit">Limites e fronteiras</span><span class="meta"><span>50 min</span><span>Grupos de 3</span><span>Tordesilhas, Bandeirantes, Reduções</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Entender que o Brasil de hoje ultrapassa o limite de Tordesilhas e identificar quem foi responsável por essa expansão.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li>Projete o atlas só com a camada <em>Tordesilhas</em>. Pergunte: o território do Brasil atual cabe nessa linha?</li>
+                            <li>Divida a turma em três grupos: um estuda <em>Tordesilhas</em>, outro os <em>Rumos dos Bandeirantes</em> e outro as <em>Reduções</em>. Cada grupo lê o texto do botão “i” e anota três ideias.</li>
+                            <li>Cada grupo apresenta sua camada em até 3 minutos, ligando-a no projetor.</li>
+                            <li>A turma liga as três camadas e discute a pergunta final.</li>
+                        </ol>
+                        <h4>Fechamento</h4>
+                        <p>Pergunta final: o que o mapa mostra sobre a distância entre o limite oficial e a ocupação real do território?</p>
+                        <p class="dica"><strong>Dica:</strong> o mapa base “Relevo” ajuda a discutir como rios e serras orientaram os caminhos.</p>
+                    </div>
+                </details>
+
+                <details class="ativ" id="a5">
+                    <summary><span class="num">5</span><span class="tit">Rotas e tropas</span><span class="meta"><span>50 min</span><span>Duplas</span><span>Caminhos, Pecuária</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Relacionar os caminhos ao transporte do gado e à ocupação do Sul.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li>Entregue a cada dupla uma folha com o contorno do Brasil e do Rio Grande do Sul.</li>
+                            <li>No atlas, os estudantes ligam um caminho por vez (Missões, Vacaria dos Pinhais, Praia, tropas) e o desenham na folha com uma cor para cada um.</li>
+                            <li>Ligam a camada <em>Pecuária</em> e marcam na folha onde ela aparece.</li>
+                            <li>Em duas frases, explicam para onde cada caminho levava e por quê.</li>
+                        </ol>
+                        <h4>Fechamento</h4>
+                        <p>Compare os traçados: eles são parecidos? Peça que a turma levante hipóteses sobre as diferenças e confira nos textos do botão “i”.</p>
+                        <p class="dica"><strong>Variação:</strong> ligue o mapa base “Relevo” e peça que identifiquem se os caminhos seguem planícies, serras ou rios.</p>
+                    </div>
+                </details>
+
+                <details class="ativ" id="a6">
+                    <summary><span class="num">6</span><span class="tit">Quem colonizou o meu município?</span><span class="meta"><span>50 a 100 min</span><span>Individual ou duplas</span><span>Imigração e colonização</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Aproximar o mapa histórico da vida dos estudantes, reconhecendo as marcas da imigração no lugar onde moram.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li>Os estudantes ligam as camadas <em>Alemães</em>, <em>Italianos</em>, <em>Açorianos</em> e as zonas de colonização, e usam o zoom para localizar o próprio município.</li>
+                            <li>Anotam quais camadas cobrem o município e o que o pop-up informa.</li>
+                            <li>Comparam com o que já sabem: sobrenomes, festas, comidas, arquitetura, o nome das ruas.</li>
+                            <li><strong>Em casa (opcional):</strong> conversam com um familiar ou vizinho mais velho sobre a história da região e trazem um relato curto.</li>
+                        </ol>
+                        <h4>Fechamento</h4>
+                        <p>Monte um mural com o que a turma encontrou. Depois, pergunte: <em>quem não aparece neste mapa?</em> A conversa pode chegar aos povos indígenas e aos africanos escravizados, que também formaram o território e não estão em todas as camadas.</p>
+                        <p class="dica"><strong>Cuidado:</strong> nem todos os estudantes têm origem nos grupos mapeados. Deixe claro que o mapa mostra o processo de colonização, e que todas as histórias da turma têm lugar na conversa.</p>
+                    </div>
+                </details>
+
+                <details class="ativ" id="a7">
+                    <summary><span class="num">7</span><span class="tit">Meu mapa temático</span><span class="meta"><span>100 min</span><span>Duplas</span><span>Camadas escolhidas</span></span></summary>
+                    <div class="corpo">
+                        <h4>Objetivo</h4>
+                        <p>Passar de leitor a autor: escolher uma pergunta, selecionar as camadas que a respondem e apresentar o resultado como um mapa completo.</p>
+                        <h4>Roteiro</h4>
+                        <ol>
+                            <li><strong>Pergunta (15 min):</strong> cada dupla escolhe uma pergunta que o atlas possa responder, por exemplo “Onde o café e o mate se sobrepõem?”.</li>
+                            <li><strong>Montagem (30 min):</strong> escolhem as camadas, o mapa base e, se quiserem, um ano na linha do tempo.</li>
+                            <li><strong>Exportação (15 min):</strong> clicam em “Exportar mapa em PDF”, enquadram a área, dão um título ao mapa e geram o arquivo. Se preferirem imagem, salvam em JPG.</li>
+                            <li><strong>Conferência (10 min):</strong> verificam a lista de elementos do mapa abaixo.</li>
+                            <li><strong>Apresentação (30 min):</strong> cada dupla mostra o mapa em 3 minutos e responde a uma pergunta da turma.</li>
+                        </ol>
+                        <h4>Lista de conferência</h4>
+                        <ul>
+                            <li>Título que diz o que o mapa mostra.</li>
+                            <li>Legenda com as camadas usadas.</li>
+                            <li>Escala e seta norte.</li>
+                            <li>Fonte: o atlas e os textos do botão “i”.</li>
+                        </ul>
+                        <p class="dica"><strong>Dica:</strong> ao gerar o PDF, deixe a escala de impressão em 100% para que a escala numérica continue correta.</p>
+                    </div>
+                </details>
+            </section>
+
+            <section id="acessibilidade">
+                <h2>Acessibilidade e Desenho Universal para a Aprendizagem</h2>
+                <p>O atlas foi pensado a partir do Desenho Universal para a Aprendizagem (DUA): oferecer mais de um caminho para entender, participar e mostrar o que aprendeu.</p>
+                <div class="tabela">
+                    <table>
+                        <thead><tr><th>Princípio do DUA</th><th>O que o atlas oferece</th><th>O que você pode fazer</th></tr></thead>
+                        <tbody>
+                            <tr><td>Várias formas de representação</td><td>Hachuras e cores de alto contraste. Textos explicativos no botão “i”. Quatro mapas base.</td><td>Projete o atlas e leia os textos em voz alta. Use “Mapa claro” para maior contraste. Aumente o zoom do navegador para quem enxerga pouco.</td></tr>
+                            <tr><td>Várias formas de ação e expressão</td><td>Exportação em PDF e JPG. Atividades que aceitam desenho, fala e escrita.</td><td>Deixe o estudante escolher entre apresentar oralmente, escrever, desenhar ou entregar o mapa exportado.</td></tr>
+                            <tr><td>Várias formas de engajamento</td><td>Escolha das camadas e das perguntas. Trabalho em dupla.</td><td>Permita que a turma escolha o tema da atividade 7 e forme duplas por afinidade.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="nota"><strong>Estudantes cegos ou com baixa visão:</strong> o mapa em si é visual. Para esses estudantes, priorize os textos explicativos do botão “i”, a leitura em voz alta pelo professor ou por um colega e produções táteis ou orais.</p>
+            </section>
+
+            <section id="avaliacao">
+                <h2>Avaliação</h2>
+                <p>Observe o processo e não só o produto final: o que o estudante pergunta ao mapa, como argumenta e como usa a ferramenta. A tabela abaixo serve para qualquer uma das atividades.</p>
+                <div class="tabela larga">
+                    <table>
+                        <thead><tr><th>Critério</th><th>Em desenvolvimento</th><th>Alcançado</th><th>Aprofundado</th></tr></thead>
+                        <tbody>
+                            <tr><td>Leitura do mapa</td><td>Identifica as camadas, mas precisa de ajuda para usar a legenda.</td><td>Usa a legenda e o texto do botão “i” para interpretar o mapa.</td><td>Cruza várias camadas e percebe padrões que ninguém apontou.</td></tr>
+                            <tr><td>Espaço e tempo</td><td>Descreve o que vê, sem relacionar a época.</td><td>Relaciona o lugar ao período usando a linha do tempo.</td><td>Explica mudanças e permanências ao longo dos séculos.</td></tr>
+                            <tr><td>Argumentação</td><td>Responde com uma frase curta, sem justificar.</td><td>Justifica a resposta com um dado do mapa.</td><td>Compara hipóteses e confere com os textos explicativos.</td></tr>
+                            <tr><td>Autonomia com a ferramenta</td><td>Segue os passos com apoio.</td><td>Liga, desliga, filtra e exporta sozinho.</td><td>Ajuda os colegas e escolhe recursos por conta própria.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Além da tabela, vale usar o quadro da atividade 2, a linha do tempo da atividade 3, o mural da atividade 6 e o mapa exportado da atividade 7 como evidências de aprendizagem.</p>
+            </section>
+
+            <section id="problemas">
+                <h2>Se algo não funcionar</h2>
+                <div class="tabela larga">
+                    <table>
+                        <thead><tr><th>O que acontece</th><th>Causa provável</th><th>O que fazer</th></tr></thead>
+                        <tbody>
+                            <tr><td>A tela de carregamento demora ou o mapa fica em branco</td><td>Internet lenta ou instável.</td><td>Aguarde alguns segundos e atualize a página. Teste o acesso antes da aula.</td></tr>
+                            <tr><td>Uma camada está ligada, mas não aparece no mapa</td><td>“Filtrar por ano” está ligado e a camada não existia naquele ano.</td><td>Desligue o filtro ou mova a linha do tempo para um ano dentro do período da camada.</td></tr>
+                            <tr><td>O fundo de satélite está lento ou desfocado</td><td>Conexão fraca ou zoom acima do que a imagem oferece.</td><td>Troque para “Mapa claro” ou “Relevo”, que carregam mais rápido.</td></tr>
+                            <tr><td>O JPG sai com o fundo em branco</td><td>O servidor do mapa base não permite exportar como imagem.</td><td>Troque o mapa base ou gere o PDF.</td></tr>
+                            <tr><td>A escala do PDF parece errada</td><td>A impressão foi feita com “ajustar à página”.</td><td>Imprima com a escala em 100% (tamanho real).</td></tr>
+                            <tr><td>No celular o painel de camadas não aparece</td><td>O painel está recolhido.</td><td>Toque no botão “Camadas”.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="rodape">
+        <div class="rodape-in">
+            <div>
+                <p><strong>Projeto de pesquisa</strong> desenvolvido a partir do TCC de Vitória Mendonça Prestes.</p>
+                <p>Coordenação: Jefferson Rodrigues dos Santos. Bolsistas: Murilo Dias dos Santos e Veridiana Feijó da Rosa.</p>
+            </div>
+            <p><a href="index.html">Página inicial</a> · <a href="mapa.html">Abrir o atlas</a></p>
+        </div>
+    </footer>
+</body>
+</html>
