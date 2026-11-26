@@ -887,6 +887,7 @@
         <script src="data/ZONASCOLONIZADASPORALEMES_24.js"></script>
         <script src="data/PRINCIPAISRUMOSDEPENETRAODOSBANDEIRANTES_25.js"></script>
         <script src="data/TORDESILHAS_26.js"></script>
+        <script src="data/OURO_27.js"></script>
         <script>
         var highlightLayer;
         function highlightFeature(e) {
@@ -1527,7 +1528,7 @@
             var paneName = 'pane_' + id + '_' + num;
             var dados = window['json_' + id + '_' + num] || { type: 'FeatureCollection', features: [] };
             map.createPane(paneName);
-            map.getPane(paneName).style.zIndex = 400 + num;
+            map.getPane(paneName).style.zIndex = c.z || (400 + num);
             map.getPane(paneName).style['mix-blend-mode'] = 'normal';
             if (c.halo) { map.getPane(paneName).style.filter = c.halo; }   // contorno das linhas brancas
 
@@ -1627,6 +1628,7 @@
             { k: 'MATE_7', nome: 'Mate', cor: 'rgba(161,183,164,0.6)', grupo: GRUPOS[0] },
             { k: 'PECUARIA_8', nome: 'Pecuária', cor: 'rgba(88,121,74,0.6)', grupo: GRUPOS[0] },
             { k: 'ALGODO_9', nome: 'Algodão', cor: 'rgba(109,139,175,1.0)', borda: 'rgba(56,71,89,1.0)', grupo: GRUPOS[0], gen: true },
+            { k: 'OURO_27', nome: 'Ouro', cor: 'rgba(230,172,18,0.9)', borda: 'rgba(122,84,6,1.0)', grupo: GRUPOS[0], gen: true, z: 409 },
 
             { k: 'CAMINHODASMISSOES_10', nome: 'Caminho das Missões', cor: 'rgba(84,176,74,1.0)', grupo: GRUPOS[1], tipo: 'linha', gen: true },
             { k: 'CAMINHOSALTERNATIVOS_11', nome: 'Caminhos Alternativos', cor: 'rgba(255,255,255,1.0)', halo: 'drop-shadow(0 0 1px rgba(107,107,107,0.95)) drop-shadow(0 0 1px rgba(107,107,107,0.95))', grupo: GRUPOS[1], tipo: 'linha', gen: true },
@@ -1948,6 +1950,12 @@
         // Se as feições tiverem os campos INICIO e FIM (tabela de atributos do QGIS), eles valem no lugar desta tabela.
         // Camada sem período aqui nem nos campos fica sempre visível.
         var DATACAO_CAMADAS = {
+            'OURO_27': [
+                { ini: 1690,
+                  fim: 1800,
+                  fonte: "ALBUQUERQUE, Manoel Maurício de; REIS, Arthur Cézar Ferreira; CARVALHO, Carlos Delgado de. Atlas histórico escolar. 7. ed. rev. e atual. Rio de Janeiro: FENAME, 1977. p. 30.",
+                  justificativa: "Começa com as primeiras descobertas de ouro em Minas Gerais, no final do século XVII (por volta de 1690), seguidas pelas de Mato Grosso, Goiás e Bahia no século XVIII. A produção entra em declínio a partir da segunda metade do século XVIII, e o ciclo costuma ser dado por encerrado por volta de 1800." }
+            ],
             'PAUBRASIL_3': [
                 { ini: 1500,
                   fim: 1530,
@@ -2303,6 +2311,10 @@
             "ALGODO_9": [
                         "O algodão era cultivado e usado pelos povos indígenas antes da colonização e passou a ter valor comercial no século XVIII, sobretudo no Maranhão, de onde era exportado para a indústria têxtil inglesa.",
                         "A produção cresceu de novo na década de 1860, quando a Guerra de Secessão dos Estados Unidos reduziu a oferta mundial, e se expandiu depois por outras áreas do Nordeste e do Sudeste."
+            ],
+            "OURO_27": [
+                        "A descoberta de ouro no fim do século XVII, na região das Minas Gerais, atraiu milhares de pessoas de Portugal e de outras partes da colônia. Em seguida, novas jazidas foram encontradas em Mato Grosso, Goiás e na Bahia, e as áreas de mineração se espalharam pelo interior.",
+                        "A mineração deslocou o eixo econômico do Nordeste açucareiro para o Centro-Sul e fez a capital da colônia passar de Salvador para o Rio de Janeiro, em 1763. A Coroa cobrava o quinto sobre o ouro e criou casas de fundição para controlar a produção, e o abastecimento das minas estimulou o tropeirismo e a abertura de novos caminhos."
             ],
             "CAMINHODASMISSOES_10": [
                         "Rota que ligava a região das missões jesuítico-guaranis, no noroeste do atual Rio Grande do Sul, às demais áreas do território.",
