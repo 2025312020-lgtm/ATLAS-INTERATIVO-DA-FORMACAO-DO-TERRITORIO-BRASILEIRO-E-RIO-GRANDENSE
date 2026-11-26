@@ -469,6 +469,19 @@
         .linha-tempo .lt-tick.m { height: 8px; }
         .linha-tempo .lt-tick.c { height: 11px; background: rgba(16, 34, 47, 0.6); }
         .linha-tempo .lt-rot { position: absolute; top: 14px; transform: translateX(-50%); font: 600 11.5px/1 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+        /* Faixa dos períodos históricos: Colônia, Império e República */
+        .linha-tempo .lt-eras { position: relative; height: 32px; margin: 2px 10px 6px; container-type: inline-size; pointer-events: none; }
+        .linha-tempo .lt-era { position: absolute; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 8px; overflow: hidden; white-space: nowrap; box-sizing: border-box;
+            background: rgba(var(--era), 0.16); border-left: 3px solid rgb(var(--era)); transition: background-color .2s ease, opacity .2s ease; }
+        .linha-tempo .lt-era:first-child { border-radius: 6px 0 0 6px; }
+        .linha-tempo .lt-era:last-child { border-radius: 0 6px 6px 0; }
+        .linha-tempo .lt-era b { font: 700 11.5px/1.15 var(--sans); color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+        .linha-tempo .lt-era b .pre, .linha-tempo .lt-era b .a { display: none; }
+        .linha-tempo .lt-era > span { font: 500 10.5px/1.15 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+        .linha-tempo .lt-eras.filtrando .lt-era { opacity: 0.5; }
+        .linha-tempo .lt-eras.filtrando .lt-era.atual { opacity: 1; background: rgba(var(--era), 0.3); }
+        @container (min-width: 760px) { .linha-tempo .lt-era b .pre { display: inline; } }
+        @container (max-width: 420px) { .linha-tempo .lt-era > span { display: none; } .linha-tempo .lt-era { padding: 0 5px; } .linha-tempo .lt-era b .n { display: none; } .linha-tempo .lt-era b .a { display: inline; } }
         .linha-tempo .lt-nota { margin: 0 0 2px; font: 400 12px/1.4 var(--sans); color: var(--ink-2); }
         /* Períodos das camadas ligadas, alinhados com a escala de anos */
         .linha-tempo .lt-periodos { margin: 2px 10px 6px; max-height: 112px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
@@ -2098,6 +2111,7 @@
             '<div class="lt-corpo">' +
                 '<input type="range" id="lt-range" min="' + ANO_MIN + '" max="' + ANO_MAX + '" step="1" value="' + ANO_MIN + '" aria-label="Ano">' +
                 '<div class="lt-escala" id="lt-escala" aria-hidden="true"></div>' +
+                '<div class="lt-eras" id="lt-eras" role="img" aria-label="Períodos históricos: Brasil Colônia (1500 a 1822), Brasil Império (1822 a 1889) e Brasil República (1889 até hoje)"></div>' +
                 '<div class="lt-periodos" id="lt-periodos" role="group" aria-label="Períodos das camadas ligadas"></div>' +
                 '<p class="lt-nota" id="lt-nota"></p>' +
             '</div>';
@@ -2122,6 +2136,35 @@
                 }
             }
         })();
+
+        // Períodos históricos marcados sob a escala de anos
+        var ERAS = [
+            { nome: 'Colônia', ab: 'Colônia', ini: 1500, fim: 1822, rgb: '39,128,54' },
+            { nome: 'Império', ab: 'Imp.', ini: 1822, fim: 1889, rgb: '176,118,12' },
+            { nome: 'República', ab: 'República', ini: 1889, fim: null, rgb: '37,99,160' }
+        ];
+        function eraDoAno(a) { return ERAS[a < 1822 ? 0 : (a < 1889 ? 1 : 2)]; }
+        (function() {
+            var cont = document.getElementById('lt-eras');
+            ERAS.forEach(function(e) {
+                var fim = e.fim === null ? ANO_MAX : e.fim;
+                var el = document.createElement('div');
+                el.className = 'lt-era';
+                el.style.left = ((e.ini - ANO_MIN) / (ANO_MAX - ANO_MIN) * 100) + '%';
+                el.style.width = ((fim - e.ini) / (ANO_MAX - ANO_MIN) * 100) + '%';
+                el.style.setProperty('--era', e.rgb);
+                el.title = 'Brasil ' + e.nome + ': ' + e.ini + ' a ' + (e.fim === null ? 'hoje' : e.fim);
+                el.innerHTML = '<b><span class="pre">Brasil </span><span class="n">' + e.nome + '</span><span class="a">' + e.ab + '</span></b><span>' + e.ini + '–' + (e.fim === null ? 'hoje' : e.fim) + '</span>';
+                e._el = el;
+                cont.appendChild(el);
+            });
+        })();
+        function marcarEra() {
+            var cont = document.getElementById('lt-eras');
+            cont.classList.toggle('filtrando', linhaDoTempo.ativa);
+            var atual = eraDoAno(linhaDoTempo.ano);
+            ERAS.forEach(function(e) { e._el.classList.toggle('atual', linhaDoTempo.ativa && e === atual); });
+        }
 
         // Períodos das camadas ligadas: uma barra por camada, na mesma escala de anos da linha do tempo
         var perEl = document.getElementById('lt-periodos');
@@ -2216,10 +2259,11 @@
             ltEl.classList.toggle('ativa', linhaDoTempo.ativa);
             document.getElementById('lt-ativa').checked = linhaDoTempo.ativa;
             document.getElementById('lt-ano').innerHTML = linhaDoTempo.ativa
-                ? '<b>' + linhaDoTempo.ano + '</b><span>séc. ' + numeroParaRomano(Math.floor(linhaDoTempo.ano / 100) + 1) + '</span>'
+                ? '<b>' + linhaDoTempo.ano + '</b><span>séc. ' + numeroParaRomano(Math.floor(linhaDoTempo.ano / 100) + 1) + ' · ' + eraDoAno(linhaDoTempo.ano).nome + '</span>'
                 : '<span class="sem">Todos os anos</span>';
             document.getElementById('lt-play').innerHTML = reproduzindo ? ICON_PAUSE : ICON_PLAY;
             document.getElementById('lt-play').setAttribute('aria-label', reproduzindo ? 'Pausar' : 'Reproduzir a linha do tempo');
+            marcarEra();
             atualizarMarcadorPeriodos();
         }
         function atualizarNotaLinhaDoTempo() {
